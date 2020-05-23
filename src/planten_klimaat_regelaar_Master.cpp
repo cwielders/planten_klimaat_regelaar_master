@@ -87,7 +87,8 @@ byte pinArray3[8] = {A4, 13, A5, 24, 25, 20, 12, 27};
         // klimaatRegelaar(myPins[3] , myPins[7], myPins[5], myPins[4], myPlantenBakNummer),
         // plantenBakNummer(myPlantenBakNummer)
 //int currentPage= 1; //indicates the page that is active on touchscreen
-int klimaatDataNu[3][31]; //Veranderen naar byte ivm SPI
+//int klimaatDataNu[3][31]; //Veranderen naar byte ivm SPI
+byte klimaatDataNu[3][31]= {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},{2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},{3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}};
 
 class LichtSensor {
 
@@ -705,11 +706,6 @@ class Plantenbak {
     }  
 };
 
-//Arduino SPI Master
-//com 5
-
-#include <SPI.h>
-byte klimaatDataNu[3][31]= {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},{2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2},{3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}};
 
 class DataUitwisselaarMaster {
   
@@ -741,33 +737,23 @@ class DataUitwisselaarMaster {
       }
   
     digitalWrite(SS, HIGH); // disable Slave Select
-    delay(2000);////DEZE MOET ERUIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     Serial.println();
-    Serial.println("=================");
+    Serial.println("================= end transfer");
   }
 };
 
-DataUitwisselaarMaster dataUitwisselaarMaster;
-
-void setup() {
-    Serial.begin(9600);
-}
-
-void loop(){
-  dataUitwisselaarMaster.zendOntvangData();
-}
-
 Klok klok;
+DataUitwisselaarMaster dataUitwisselaarMaster;
 
 int bakNummer1 = 0;
 Plantenbak plantenbak1(pinArray1, bakNummer1);
-int bakNummer2 = bakNummer1 + 1;
+int bakNummer2 = 1;
 Plantenbak plantenbak2(pinArray2, bakNummer2);
-int bakNummer3 = bakNummer2 + 1;
+int bakNummer3 = 2;
 Plantenbak plantenbak3(pinArray3, bakNummer3);
 
 void setup() {
-    Serial.begin(57600);
+    Serial.begin(9600);
     analogReference(EXTERNAL); 
     klok.setup();
     // touchScreen.setup();
@@ -788,35 +774,8 @@ void loop() {
     plantenbak1.regelKlimaat(tijd, bakNummer1);
     plantenbak2.regelKlimaat(tijd, bakNummer2);
     plantenbak3.regelKlimaat(tijd, bakNummer3);
-
-    byte masteReceive; 
-    byte masterSend;
-    byte ontvangen[99] = {};    
-
-    digitalWrite(SlaveSelect, LOW); //Starts communication with Slave connected to master
-    delayMicroseconds(200); 
-    byte z = SPI.transfer (0xCD); //are you there
-    delayMicroseconds(20); //give the slave time to process
-    byte x = SPI.transfer (0); //0x00 is pumped to get response byte
-    delayMicroseconds(20);                 
-     //Serial.println(x);
-    if (x == 0xEF){   
-        for(int plantenbak = 0; plantenbak < 3; plantenbak++) {
-            for(int variable = 0; variable < 33; variable++) {
-                masterSend = klimaatDataNu[plantenbak][variable];
-                Serial.println("de verzonden byte is");
-                Serial.println(masterSend);
-                masteReceive = SPI.transfer(masterSend);
-                delayMicroseconds(20); //give the slave time to process
-                Serial.println("de ontvangen byte is");
-                Serial.println(masteReceive);
-                ontvangen[((plantenbak*33) + variable)] = masteReceive;
-            }
-        }        
-        digitalWrite(SlaveSelect, HIGH);  // disable Slave Select
-        delay(2000);
-        Serial.println("End of transmission");
-    }    
+    dataUitwisselaarMaster.zendOntvangData();
+    delay(2000);////DEZE MOET ERUIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     Serial.println();
     Serial.print("end of loop Master");   
 }
