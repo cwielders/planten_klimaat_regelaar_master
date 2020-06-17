@@ -949,36 +949,24 @@ class DataUitwisselaarMaster {
     Serial.println(x);
     if (x == 0xEF){//0xEF=239
         for ( byte i = 0 ; i < 3 ; i++){
-          for (byte j = 0 ; j < 31 ; j++){
-            b = (klimaatDataNu[i][j]);
-            byte y = SPI.transfer (b);
-            // Serial.print("verzonden byte is:");
-            // Serial.println(b);
-            delayMicroseconds(20); //give the slave time to process
-            klimaatDataNu[i][j] = y;
-            Serial.print(klimaatDataNu[i][j]);
-            Serial.print(" / j is:");
-            Serial.print(j);
-            Serial.print(" / i is:");
-            Serial.println(i);
-            Serial.print("/");
-            Serial.print("j is:");
-            Serial.println(j);
-            Serial.print("/");
-            Serial.print("i is:");
-            Serial.println(i);
-            Serial.print("/");
-            Serial.print("j is:");
-            Serial.println(j);
-            Serial.print("/");
-
-          }
-          //Serial.println();
+            for (byte j = 0 ; j < 31 ; j++){
+                b = (klimaatDataNu[i][j]);
+                byte y = SPI.transfer (b);
+                klimaatDataNu[i][j] = y;
+                delayMicroseconds(20); //give the slave time to process
+                Serial.print("verzonden byte is:");//deze print opdrachten zijn essientieel voor SPR
+                Serial.println(b);//deze print opdrachten zijn essientieel voor SPR
+                Serial.print("ontvangen byte is:");//deze print opdrachten zijn essientieel voor SPR
+                Serial.println(klimaatDataNu[i][j]);//deze print opdrachten zijn essientieel voor SPR
+                Serial.print(" / j is:");//deze print opdrachten zijn essientieel voor SPR
+                Serial.print(j);//deze print opdrachten zijn essientieel voor SPR
+                Serial.print(" / i is:");//deze print opdrachten zijn essientieel voor SPR
+                Serial.println(i);//deze print opdrachten zijn essientieel voor SPR
+            }
         }
-      }
-  
+    }
     digitalWrite(SS2, HIGH); // disable Slave Select
-    delay(2000);////DEZE MOET ERUIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //delay(2000);////DEZE MOET ERUIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     Serial.println();
     Serial.println("=================");
   }
@@ -1137,16 +1125,32 @@ void loop(){
     delay(2000);
     RtcDateTime tijd = klok.getTime();
     defineSettings.getSettingsNu();
+    // for ( byte i = 0 ; i < 3 ; i++){
+    //     for (byte j = 0 ; j < 31 ; j++){
+    //         Serial.print(klimaatDataNu[i][j]);
+    //     }
+    //     Serial.println();
+
+    // }  
+    // delay(2000);
     dataUitwisselaarMaster.zendOntvangData();
-    //delay(2000);
+
     if(currentPage == 1 or currentPage == 0) { ///waar komt die nul vandaan????????
         touchScreen.toonStartScherm(datumTijd);
     }
-    int teller = 120;//zorgt er voor dat het scherm langer gevoelig is
+    int teller = 150;//zorgt er voor dat het scherm langer gevoelig is
     while ((currentPage == 1 or currentPage == 0) && teller > 0) {
         touchScreen.kiesPlantenBak();
         teller = teller-1;
         Serial.print(teller);
     }
+    Serial.println();
+    // for ( byte i = 0 ; i < 3 ; i++){
+    //     for (byte j = 0 ; j < 31 ; j++){
+    //         Serial.print(klimaatDataNu[i][j]);
+    //     }
+    //     Serial.println();
+    // }
+    // delay(2000);
     Serial.println("einde loop Master");
 }
