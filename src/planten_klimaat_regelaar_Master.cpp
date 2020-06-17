@@ -15,44 +15,45 @@
 #define POTVOCHTIGHEID 3
 #define DUURDAUW 4
 #define DUURREGEN 5
-// #define DUURBEWOLKING 6
-#define DUURDAG 6
+#define DUURBEWOLKING 6
+#define DUURDAG 7
 
-#define ISDAUW 4
-#define ISREGEN 5
-//#define ISBEWOLKT 6
-#define ISDAG 6
+#define LAMPENVERVANGEN 8
+#define SEIZOEN 9
+#define JAAR 10
+#define MAAND 11
+#define DAG 12
+#define UUR 13
+#define MINUUT 14
+#define SECONDE 15
+#define TEMPERATUURNU 16
+#define LUCHTVOCHTIGHEIDNU 17
+#define POTVOCHTIGHEIDNU 18
+#define LICHTNU 19
+#define LAMPENAAN1 20
+#define LAMPENAAN2 21
+#define VENTILATORAAN 22
+#define VERNEVELAARAAN 23
+#define ISDAUW 24
+#define ISREGEN 25
+#define ISDAG 26
+#define ISBEWOLKING 27
 
-#define PLANTENBAKNUMMER 9
-#define SEIZOEN 10
-#define JAAR 11
-#define MAAND 12
-#define DAG 13
-#define UUR 14
-#define MINUUT 15
-#define SECONDE 16
-#define TEMPERATUURNU 20
-#define LUCHTVOCHTIGHEIDNU 21
-#define POTVOCHTIGHEIDNU 22
-#define LICHTNU 23
-#define LAMPENAAN1 24
-#define LAMPENAAN2 20
-#define VENTILATORAAN 21
-#define VERNEVELAARAAN 22
-#define VENTILATORAAN 23
-#define VERNEVELAARAAN 24
-#define WATERGEVEN 25
-#define HOOGSTEPOTVOCHTIGHEID 26
-#define MEESTELICHT 27
-#define LAMPENVERVANGEN 28
+#define HOOGSTEPOTVOCHTIGHEID 28
+#define MEESTELICHT 29
+#define WATERGEVEN 30
 
-#define STARTDAG 16
-#define EINDDAG 17
-#define STARTDAUW 18
-//#define ZONOP 19
-//define ZONONDER 20
-#define STARTREGEN 19
-#define EINDREGEN 20
+//klimaatDataNu[plantenBakNummer][STARTDAG] = is hardcoded 8
+// #define STARTDAG 32
+// #define EINDDAG 33
+// #define STARTDAUW 34
+// #define STARTREGEN 35
+// #define EINDREGEN 36
+// #define STARTBEWOLKING 37
+// #define EINDBEWOLKING 38
+// #define PLANTENBAKNUMMER 8
+//#define ZONOP 39
+//define ZONONDER 40
 
 #define WINTER 0
 #define ZOMER 1
@@ -74,6 +75,7 @@ int SS2 = 10; //Slave select pin voor SPI
 byte defaultPlantenBakSettings[3][4][12] = {{{25, 14, 60, 20, 75, 3, 0, 0, 11, 8}, {35, 28, 55, 10, 75, 2, 0, 0, 12, 8}, {30, 25, 35, 80, 4, 5, 85, 4, 1,13, 8}, {0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0}}, {{8, 21, 20, 14, 4, 0, 70, 1, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 1, 20, 75}, {8, 23, 35, 30, 4, 5, 85, 1, 20, 75}, {1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1}}, {{8, 21, 20, 14, 4, 0, 70, 2, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 2, 20, 75}, {8, 23, 35, 30, 4, 5, 85, 2, 20, 75}, {2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2}}};
 byte customPlantenBakSettings[3][4][12] = {{{25, 14, 60, 20, 75, 3, 0, 0, 11, 8}, {35, 28, 55, 10, 75, 2, 0, 0, 12, 8}, {30, 25, 35, 80, 4, 5, 85, 4, 1,13, 8}, {0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0}}, {{8, 21, 20, 14, 4, 0, 70, 1, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 1, 20, 75}, {8, 23, 35, 30, 4, 5, 85, 1, 20, 75}, {1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1}}, {{8, 21, 20, 14, 4, 0, 70, 2, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 2, 20, 75}, {8, 23, 35, 30, 4, 5, 85, 2, 20, 75}, {2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2}}};
 
+//byte klimaatDataNu[3][39]= {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38},{1,5,5,5,5,5,5,5,5,5,5,5,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,5,5,5},{2,6,6,6,3,3,3,3,3,3,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,6,6,6,6,6,6,6,6,6,6,6,6}};
 byte klimaatDataNu[3][31]= {{0,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4},{1,5,5,5,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,5,5,5},{2,6,6,6,3,3,3,3,3,3,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,6,6,6,6}};
 
 class DefineSettings {
@@ -83,7 +85,7 @@ class DefineSettings {
     
     void getSettingsNu() {
         for (int plantenBakNummer = 0; plantenBakNummer < 3; plantenBakNummer++){
-            klimaatDataNu[plantenBakNummer][PLANTENBAKNUMMER] = plantenBakNummer;
+            //klimaatDataNu[plantenBakNummer][PLANTENBAKNUMMER] = plantenBakNummer;
             int seizoenNu = customPlantenBakSettings[plantenBakNummer][3][(klimaatDataNu[plantenBakNummer][MAAND]-1)];
             klimaatDataNu[plantenBakNummer][SEIZOEN] = seizoenNu;
             int uurNu = klimaatDataNu[plantenBakNummer][UUR];
@@ -95,52 +97,64 @@ class DefineSettings {
             boolean isDag;
             boolean isDauw;
             boolean isRegen;
+            boolean isBewolking;
             
             switch (seizoenNu) {
                 case WINTER:
-                    for (int i = 0; i < 7; i++) {
+                    for (int i = 0; i < 8; i++) {
                         klimaatDataNu[plantenBakNummer][i] = customPlantenBakSettings[plantenBakNummer][WINTER][i];
                     }
                     break;
                 case ZOMER:
-                    for (int i = 0; i < 7; i++) {
+                    for (int i = 0; i < 8; i++) {
                         klimaatDataNu[plantenBakNummer][i] = customPlantenBakSettings[plantenBakNummer][ZOMER][i];
                 }
                     break;
                 case REGEN:
-                    for (int i = 0; i < 7; i++) {
+                    for (int i = 0; i < 8; i++) {
                         klimaatDataNu[plantenBakNummer][i] = customPlantenBakSettings[plantenBakNummer][REGEN][i];
                     }
                     break;
             }       
-            float eindDag = klimaatDataNu[plantenBakNummer][STARTDAG] + klimaatDataNu[plantenBakNummer][DUURDAG];
-            klimaatDataNu[plantenBakNummer][EINDDAG] = eindDag;
-            if (uurMinuutNu >= klimaatDataNu[plantenBakNummer][STARTDAG] && uurMinuutNu <= eindDag) {
+            float eindDag = klimaatDataNu[plantenBakNummer][DUURDAG] + 8;
+            //klimaatDataNu[plantenBakNummer][EINDDAG] = eindDag;
+            if(uurMinuutNu >= 8 && uurMinuutNu <= eindDag) {
                 isDag = true;
             }   else {
                     isDag = false;
                 }
             klimaatDataNu[plantenBakNummer][ISDAG] = isDag;
             
-            float startDauw = klimaatDataNu[plantenBakNummer][STARTDAG] - klimaatDataNu[plantenBakNummer][DUURDAUW];
-            klimaatDataNu[plantenBakNummer][STARTDAUW] = startDauw;
-            if (uurMinuutNu >= startDauw && uurMinuutNu <= klimaatDataNu[plantenBakNummer][STARTDAG]) {
+            float startDauw = 8 - klimaatDataNu[plantenBakNummer][DUURDAUW];
+            //klimaatDataNu[plantenBakNummer][STARTDAUW] = startDauw;
+            if (uurMinuutNu >= startDauw && uurMinuutNu <= 8) {
                 isDauw = true;
             }   else {
                     isDauw = false;
                 }
             klimaatDataNu[plantenBakNummer][ISDAUW] = isDauw;
 
-            float startRegen = klimaatDataNu[plantenBakNummer][STARTDAG] + ((klimaatDataNu[plantenBakNummer][DUURDAG] - klimaatDataNu[plantenBakNummer][DUURREGEN]) / 2);
+            float startRegen = 8 + ((klimaatDataNu[plantenBakNummer][DUURDAG] - klimaatDataNu[plantenBakNummer][DUURREGEN]) / 2);
             float eindRegen = startRegen + klimaatDataNu[plantenBakNummer][DUURREGEN];
-            klimaatDataNu[plantenBakNummer][STARTREGEN] = startRegen;
-            klimaatDataNu[plantenBakNummer][EINDREGEN] = eindRegen;
+            // klimaatDataNu[plantenBakNummer][STARTREGEN] = startRegen;
+            // klimaatDataNu[plantenBakNummer][EINDREGEN] = eindRegen;
             if (uurMinuutNu >= startRegen && uurMinuutNu <= eindRegen) {
                 isRegen = true;
             }   else {
                     isRegen = false;
                 }
             klimaatDataNu[plantenBakNummer][ISREGEN] = isRegen;
+
+            float startBewolking = 8 + ((klimaatDataNu[plantenBakNummer][DUURDAG] - klimaatDataNu[plantenBakNummer][DUURBEWOLKING]) / 2);
+            float eindBewolking = startBewolking + klimaatDataNu[plantenBakNummer][DUURBEWOLKING];
+            // klimaatDataNu[plantenBakNummer][STARTBEWOLKING] = startBewolking;
+            // klimaatDataNu[plantenBakNummer][EINDBEWOLKING] = eindBewolking;
+            if (uurMinuutNu >= startBewolking && uurMinuutNu <= eindBewolking) {
+                isBewolking = true;
+            }   else {
+                    isBewolking = false;
+                }
+            //klimaatDataNu[plantenBakNummer][ISBEWOLKING] = isBewolking;
         }
     }
 };
@@ -296,7 +310,7 @@ class TouchScreen {
             myGLCD.print(String(customPlantenBakSettings[bak][i][NACHTTEMPERATUUR]), 29, (i*71) + 13);
             myGLCD.print(String(customPlantenBakSettings[bak][i][DAGTEMPERATUUR]), 85, (i*71) + 13);
             myGLCD.print(String(customPlantenBakSettings[bak][i][DUURDAG]), 200, (i*71) + 13);
-            myGLCD.print(String(customPlantenBakSettings[bak][i][STARTDAG])+ String("H"), 270, (i*71) + 13);
+            myGLCD.print(String(8)+ String("H"), 270, (i*71) + 13);
             myGLCD.print(String("C"), 115, (i*71) + 13);
             myGLCD.fillCircle(116, (i*71) + 15, 2);
             myGLCD.print(String(customPlantenBakSettings[bak][i][LUCHTVOCHTIGHEID]) + "%", 60, (i*71) + 55);
@@ -304,7 +318,7 @@ class TouchScreen {
             myGLCD.print(String(customPlantenBakSettings[bak][i][LAMPENVERVANGEN]) + "%", 140, (i*71) + 55);
             myGLCD.print(String(customPlantenBakSettings[bak][i][DUURREGEN]) + "H", 280, (i*71) + 55);
             myGLCD.print(String(customPlantenBakSettings[bak][i][DUURDAUW]) + "H", 240, (i*71) + 55);
-            //myGLCD.print(String(customPlantenBakSettings[bak][i][DUURBEWOLKING]) + "H", 200, (i*71) + 55);
+            myGLCD.print(String(customPlantenBakSettings[bak][i][DUURBEWOLKING]) + "H", 200, (i*71) + 55);
             myGLCD.setFont(SmallFont);
             for(int j = 0; j <12; j++) {
                 myGLCD.setFont(SmallFont);
@@ -490,7 +504,7 @@ class TouchScreen {
                     }
                     if ((y<=(i*71) + 29) && (y>=(i*71) + 13) && (x>=270 && x<=338)) { 
                     drawButtons();
-                    variable = STARTDAG;
+                    //variable = STARTDAG;
                     leesGetal(bak, seizoen, variable);
                     }
                     if ((y<=(i*71) + 29) && (y>=(i*71) + 13) && (x>=140 && x<=172)) { 
@@ -918,30 +932,73 @@ class DataUitwisselaarMaster {
   }  
   void zendOntvangData(){
     byte b;
+    Serial.println("in zendontvangdata");
     digitalWrite(SS2, LOW);// enable Slave Select
     delayMicroseconds (200);
-    byte z = SPI.transfer (0xCD); //Verzend startcode 0xCD voor Slave
+    byte z = SPI.transfer (0xCD); //0xCD = 205 Verzend startcode 0xCD voor Slave
     delayMicroseconds(20); //give the slave time to process
-    byte x = SPI.transfer (0xF3); //0xEF is pumped to get response byte from slave
-    delayMicroseconds(20); //give the slave time to process
-    Serial.print("de ontvangen respons is: ");
-     Serial.println(x);
-      if (x == 0xEF){
+    Serial.print("Na eerste verzonden byte is:");
+    Serial.println(0xCD);
+    Serial.print("eerste terugontvangen byte is: ");
+    Serial.println(z);
+    byte x = SPI.transfer (0xF3); //0xEF=243 is pumped to get response byte from slave
+    Serial.print("Na tweede verzonden byte is:");
+    Serial.println(0xF3);
+    delayMicroseconds(50); //give the slave time to process
+    Serial.print("tweede terugontvangen byte is: ");
+    Serial.println(x);
+    if (x == 0xEF){//0xEF=239
         for ( byte i = 0 ; i < 3 ; i++){
           for (byte j = 0 ; j < 31 ; j++){
             b = (klimaatDataNu[i][j]);
             byte y = SPI.transfer (b);
+            // Serial.print("verzonden byte is:");
+            // Serial.println(b);
             delayMicroseconds(20); //give the slave time to process
             klimaatDataNu[i][j] = y;
             Serial.print(klimaatDataNu[i][j]);
-            Serial.print(" / ");
+            Serial.print("/");
+            // Serial.print("j is:");
+            // Serial.println(j);
+            // Serial.print("/");
+            // Serial.print("i is:");
+            // Serial.println(i);
+            // Serial.print("/");
+            // Serial.print("j is:");
+            // Serial.println(j);
+            // Serial.print("/");
+            // Serial.print("i is:");
+            // Serial.println(i);
+            // Serial.print("/");
+            // Serial.print("j is:");
+            // Serial.println(j);
+            // Serial.print("/");
+            // Serial.print("i is:");
+            // Serial.println(i);
+            // Serial.print("/");
+            // Serial.print("j is:");
+            // Serial.println(j);
+            // Serial.print("/");
+            // Serial.print("i is:");
+            // Serial.println(i);
+            // Serial.print("/");
+            // Serial.print("j is:");
+            // Serial.println(j);
+            // Serial.print("/");
+            // Serial.print("i is:");
+            // Serial.println(i);
+            // Serial.print("/");
+            // Serial.print("j is:");
+            // Serial.println(j);
+            // Serial.print("/");
+            // Serial.print("i is:");
+            // Serial.println(i);
           }
           Serial.println();
         }
       }
   
     digitalWrite(SS2, HIGH); // disable Slave Select
-    delay(2000);////DEZE MOET ERUIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     Serial.println();
     Serial.println("=================");
   }
@@ -1091,10 +1148,16 @@ void setup (void){
 
 void loop(){
     Serial.println("nieuwe loop Master");
+    for ( byte i = 0 ; i < 3 ; i++){
+        for (byte j = 0 ; j < 31 ; j++){
+            Serial.print(klimaatDataNu[i][j]);
+        }
+       Serial.println();
+    }
     RtcDateTime tijd = klok.getTime();
     defineSettings.getSettingsNu();
     dataUitwisselaarMaster.zendOntvangData();
-    
+    delay(2000);
     if(currentPage == 1 or currentPage == 0) { ///waar komt die nul vandaan????????
         touchScreen.toonStartScherm(datumTijd);
     }
@@ -1105,4 +1168,5 @@ void loop(){
         Serial.print(teller);
     }
         Serial.println("einde loop Master");
+    delay(5000);
 }
