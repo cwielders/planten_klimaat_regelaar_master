@@ -7,57 +7,53 @@
 #include <RtcDS3231.h>
 #include <Wire.h> // must be included here so that Arduino library object file references work (clock)
 
-#define DAGTEMPERATUUR 0
-#define NACHTTEMPERATUUR 1
-#define LUCHTVOCHTIGHEID 2
-//#define LUCHTVOCHTIGHEIDDAG 2
-//#define LUCHTVOCHTIGHEIDNACHT 3
-#define POTVOCHTIGHEID 3
-#define DUURDAUW 4
-#define DUURREGEN 5
-#define DUURBEWOLKING 6
-#define DUURDAG 7
 
-#define LAMPENVERVANGEN 8
-#define SEIZOEN 9
-#define JAAR 10
-#define MAAND 11
-#define DAG 12
-#define UUR 13
-#define MINUUT 14
-#define SECONDE 15
-#define TEMPERATUURNU 16
-#define LUCHTVOCHTIGHEIDNU 17
-#define POTVOCHTIGHEIDNU 18
-#define LICHTNU 19
+
+#define MINPOTVOCHTIGHEID 0
+#define DUURDAUW 1
+#define DUURREGEN 2
+#define DUURBEWOLKING 3
+#define DUURDAG 4
+
+#define DAGTEMPERATUUR 5
+#define NACHTTEMPERATUUR 6
+#define LUCHTVOCHTIGHEID 7
+#define RESERVE1 8
+#define RESERVE2 9
+#define ISDAG 10
+#define ISDAUW 11
+#define ISBEWOLKING 12
+#define ISREGEN 13
+#define ISPOMP 14
+
+#define TEMPERATUURNU 15
+#define LUCHTVOCHTIGHEIDNU 16
+#define POTVOCHTIGHEIDNU 17
+#define LICHTNU 18
+#define WATERSTANDNU 19
 #define LAMPENAAN1 20
 #define LAMPENAAN2 21
 #define VENTILATORAAN 22
 #define VERNEVELAARAAN 23
-#define ISDAUW 24
-#define ISREGEN 25
-#define ISDAG 26
-#define ISBEWOLKING 27
+#define RESERVE3 24
 
-#define HOOGSTEPOTVOCHTIGHEID 28
-#define MEESTELICHT 29
-#define WATERGEVEN 30
+#define PLANTENBAKNUMMER 25
+#define SEIZOEN 26
+#define JAAR 27
+#define MAAND 28
+#define DAG 29
+#define UUR 30
+#define MINUUT 31
+#define HOOGSTEPOTVOCHTIGHEID 32
+#define MEESTELICHT 33
+#define WATERGEVEN 34
+#define LAMPENVERVANGEN 35
+#define ZONOP 36
+#define ZONONDER 37
 
-//klimaatDataNu[plantenBakNummer][STARTDAG] = is hardcoded 8
-// #define STARTDAG 32
-// #define EINDDAG 33
-// #define STARTDAUW 34
-// #define STARTREGEN 35
-// #define EINDREGEN 36
-// #define STARTBEWOLKING 37
-// #define EINDBEWOLKING 38
-// #define PLANTENBAKNUMMER 8
-//#define ZONOP 39
-//define ZONONDER 40
-
-#define WINTER 0
 #define ZOMER 1
 #define REGEN 2
+#define WINTER 0
 
 #define CHIANGMAI 0
 #define MANAUS 1
@@ -72,28 +68,25 @@ int currentPage; //indicates the page that is active on touchscreen
 
 int SS2 = 10; //Slave select pin voor SPI
 
-byte defaultPlantenBakSettings[3][4][12] = {{{25, 14, 60, 20, 75, 3, 0, 0, 11, 8}, {35, 28, 55, 10, 75, 2, 0, 0, 12, 8}, {30, 25, 35, 80, 4, 5, 85, 4, 1,13, 8}, {0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0}}, {{8, 21, 20, 14, 4, 0, 70, 1, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 1, 20, 75}, {8, 23, 35, 30, 4, 5, 85, 1, 20, 75}, {1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1}}, {{8, 21, 20, 14, 4, 0, 70, 2, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 2, 20, 75}, {8, 23, 35, 30, 4, 5, 85, 2, 20, 75}, {2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2}}};
-byte customPlantenBakSettings[3][4][12] = {{{25, 14, 60, 20, 75, 3, 0, 0, 11, 8}, {35, 28, 55, 10, 75, 2, 0, 0, 12, 8}, {30, 25, 35, 80, 4, 5, 85, 4, 1,13, 8}, {0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0}}, {{8, 21, 20, 14, 4, 0, 70, 1, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 1, 20, 75}, {8, 23, 35, 30, 4, 5, 85, 1, 20, 75}, {1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1}}, {{8, 21, 20, 14, 4, 0, 70, 2, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 2, 20, 75}, {8, 23, 35, 30, 4, 5, 85, 2, 20, 75}, {2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2}}};
+byte defaultPlantenBakSettings[3][4][12] = {{{25, 14, 60, 20, 75, 3, 0, 0}, {35, 28, 55, 10, 75, 2, 0, 0}, {11, 22, 33, 44, 55, 66, 77, 88, 99}, {0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0}}, {{8, 21, 20, 14, 4, 0, 70, 1}, {8, 22, 30, 20, 4, 1, 55, 1}, {8, 23, 35, 30, 4, 5, 85, 1}, {1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1}}, {{8, 21, 20, 14, 4, 0, 70, 2}, {8, 22, 30, 20, 4, 1, 55, 2}, {8, 23, 35, 30, 4, 5, 85, 2}, {2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2}}};
+byte customPlantenBakSettings[3][4][12] = {{{11, 22, 33, 44, 55, 66, 77, 88, 99}, {35, 28, 55, 10, 75, 2, 0, 0}, {30, 25, 35, 80, 4, 5, 85, 4, 1,13, 8}, {0, 0, 1, 1, 1, 1, 2, 2, 0, 0, 0, 0}}, {{8, 21, 20, 14, 4, 0, 70, 1, 20, 75}, {11, 22, 33, 44, 55, 66, 77, 88, 99}, {8, 23, 35, 30, 4, 5, 85, 1, 20, 75}, {1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1}}, {{8, 21, 20, 14, 4, 0, 70, 2, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 2, 20, 75}, {11, 22, 33, 44, 55, 66, 77, 88, 99}, {2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2}}};
+byte klimaatDataNu[3][38]= {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}};
 
-//byte klimaatDataNu[3][39]= {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38},{1,5,5,5,5,5,5,5,5,5,5,5,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,5,5,5},{2,6,6,6,3,3,3,3,3,3,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,6,6,6,6,6,6,6,6,6,6,6,6}};
-byte klimaatDataNu[3][31]= {{0,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4},{1,5,5,5,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,5,5,5},{2,6,6,6,3,3,3,3,3,3,0,0,0,0,0,0,3,3,3,3,3,3,3,3,3,3,3,6,6,6,6}};
-
-class DefineSettings {
+class DefineSettingsNu {
 
     public:
-    DefineSettings() {}
+    DefineSettingsNu() {}
     
-    void getSettingsNu() {
+    static void getSettingsNu() {
+        Serial.print("in get settingsnu");
         for (int plantenBakNummer = 0; plantenBakNummer < 3; plantenBakNummer++){
-            //klimaatDataNu[plantenBakNummer][PLANTENBAKNUMMER] = plantenBakNummer;
-            int seizoenNu = customPlantenBakSettings[plantenBakNummer][3][(klimaatDataNu[plantenBakNummer][MAAND]-1)];
+            klimaatDataNu[plantenBakNummer][PLANTENBAKNUMMER] = plantenBakNummer;
+            int seizoenNu = customPlantenBakSettings[plantenBakNummer][3][(klimaatDataNu[plantenBakNummer][MAAND])-1];
             klimaatDataNu[plantenBakNummer][SEIZOEN] = seizoenNu;
             int uurNu = klimaatDataNu[plantenBakNummer][UUR];
             int minuutNu = klimaatDataNu[plantenBakNummer][MINUUT];
             float uurMinuutNu = uurNu + (minuutNu / 60);
-            Serial.print("uurMinuutNu = ");
-            Serial.println(uurMinuutNu);
-            
+                        
             boolean isDag;
             boolean isDauw;
             boolean isRegen;
@@ -101,18 +94,21 @@ class DefineSettings {
             
             switch (seizoenNu) {
                 case WINTER:
-                    for (int i = 0; i < 8; i++) {
+                    for (int i = 0; i < 10; i++) {
                         klimaatDataNu[plantenBakNummer][i] = customPlantenBakSettings[plantenBakNummer][WINTER][i];
+                        Serial.print("Winter in get settings");
                     }
                     break;
                 case ZOMER:
-                    for (int i = 0; i < 8; i++) {
+                    for (int i = 0; i < 10; i++) {
                         klimaatDataNu[plantenBakNummer][i] = customPlantenBakSettings[plantenBakNummer][ZOMER][i];
+                        Serial.print("Zomer in get settings");
                 }
                     break;
                 case REGEN:
-                    for (int i = 0; i < 8; i++) {
+                    for (int i = 0; i < 10; i++) {
                         klimaatDataNu[plantenBakNummer][i] = customPlantenBakSettings[plantenBakNummer][REGEN][i];
+                        Serial.print("Regen in get settings");
                     }
                     break;
             }       
@@ -156,6 +152,14 @@ class DefineSettings {
                 }
             //klimaatDataNu[plantenBakNummer][ISBEWOLKING] = isBewolking;
         }
+        Serial.println("klimaatDataNu");
+        for ( byte i = 0 ; i < 3 ; i++){
+            for (byte j = 0 ; j < 33 ; j++){
+                Serial.print(klimaatDataNu[i][j]);
+            }
+            Serial.println();
+        }  
+
     }
 };
 
@@ -189,8 +193,8 @@ class TouchScreen {
 
     void toonStartScherm(String myDatumTijd) {
         Serial.println("begin toonstartscherm");
+        DefineSettingsNu::getSettingsNu();
         currentPage = 1;
-        Serial.println(myDatumTijd);
         Serial.print("currentPage = ");
         Serial.println(currentPage);
         myGLCD.clrScr();
@@ -255,7 +259,7 @@ class TouchScreen {
             myGLCD.print(String("C"), 60, (i*71) + 18);
             myGLCD.fillCircle(61, (i*71) + 19, 2);
             myGLCD.print(String(klimaatDataNu[i][LUCHTVOCHTIGHEIDNU]) + "%", 5, (i*71) + 51);
-            myGLCD.print(String(klimaatDataNu[i][POTVOCHTIGHEID]) + "%", 140, (i*71) + 18);
+            myGLCD.print(String(klimaatDataNu[i][MINPOTVOCHTIGHEID]) + "%", 140, (i*71) + 18);
             myGLCD.print(String(klimaatDataNu[i][LICHTNU]) + "%", 140, (i*71) + 51);
         }
         myGLCD.setColor(VGA_WHITE);
@@ -424,8 +428,8 @@ class TouchScreen {
         tekenSettingsOverzicht(bak);
         int variable;
         currentPage = 3;
-    Serial.print("currentPage = ");
-    Serial.println(currentPage);
+        Serial.print(" currentPage = ");
+        Serial.print(currentPage);
         myGLCD.setColor(VGA_BLACK);
         myGLCD.setBackColor(VGA_BLACK);
         myGLCD.fillRoundRect(2, 215, 80, 238);
@@ -459,7 +463,7 @@ class TouchScreen {
                         //toonStartScherm("changmai");
                     }
                     if ((x>=80) && (x<=160)) {
-                        betast(2, 215, 80, 238);
+                        betast(82, 215, 160, 238);
                         for(int i=0; i<3; i++) {
                             for(int j=0; j<12; j++) {
                                 customPlantenBakSettings[bak][i][j] = defaultPlantenBakSettings[MANAUS][i][j];
@@ -469,7 +473,7 @@ class TouchScreen {
                         tekenSettingsManipulatieScherm(bak);
                     }
                     if ((x>=160) && (x<=240)) {
-                        betast(2, 215, 80, 238);
+                        betast(162, 215, 240, 238);
                         for(int i=0; i<3; i++) {
                             for(int j=0; j<12; j++) {
                                 customPlantenBakSettings[bak][i][j] = defaultPlantenBakSettings[SUMATRA][i][j];
@@ -479,8 +483,21 @@ class TouchScreen {
                     }
                     if ((x>=240) && (x<=320)) {
                         betast(242, 215, 318, 238);
-                        //String test = "nogmaals";
-                        //toonStartScherm(test);
+                        String test = "back pressed";    //terugveranderen                        
+                        //DefineSettingsNu::getSettingsNu();
+                        Serial.println("BACK GEDRUKT IN SETTINGSSCHERM");
+                        Serial.println("customPlantenBakSettings");
+                        for ( int i = 0 ; i < 3 ; i++){
+                            for(int k = 0; k < 4; k++){
+                                for (byte j = 0 ; j < 12 ; j++){
+                                    Serial.print(customPlantenBakSettings[i][k][j]);
+                                    Serial.print("/");
+                                }  
+                            Serial.print("/////");      
+                            }
+                        Serial.println();
+                        }
+                        toonStartScherm(test);//VERVANGEN DOOR BREAK IN KIES PLANTENBAK??????
                         currentPage = 0;
                         break;
                     }
@@ -556,8 +573,8 @@ class TouchScreen {
                         
                         }
                     }
-                myGLCD.setColor(VGA_WHITE);
-                myGLCD.drawRoundRect((j*26) + 4, (k*71) + 29, (j*26) + 30, (k*71) + 42);
+               // myGLCD.setColor(VGA_WHITE);
+               // myGLCD.drawRoundRect((j*26) + 4, (k*71) + 29, (j*26) + 30, (k*71) + 42);
                 }
                 k = 1;
                 for(int j = 0; j <12; j++) {
@@ -597,8 +614,8 @@ class TouchScreen {
                                 myGLCD.print("dec", 292, (i*71) + 29);
                         }
                     }
-                myGLCD.setColor(VGA_WHITE);
-                myGLCD.drawRoundRect((j*26) + 4, (k*71) + 29, (j*26) + 30, (k*71) + 42);
+                // myGLCD.setColor(VGA_WHITE);
+                // myGLCD.drawRoundRect((j*26) + 4, (k*71) + 29, (j*26) + 30, (k*71) + 42);
                 }
                 k = 2;
                 for(int j = 0; j <12; j++) {
@@ -637,20 +654,16 @@ class TouchScreen {
                                 myGLCD.print("dec", 292, (i*71) + 29);
                         }
                     }
-                myGLCD.setColor(VGA_WHITE);
-                myGLCD.drawRoundRect((j*26) + 4, (k*71) + 29, (j*26) + 30, (k*71) + 42);
+                // myGLCD.setColor(VGA_WHITE);
+                // myGLCD.drawRoundRect((j*26) + 4, (k*71) + 29, (j*26) + 30, (k*71) + 42);
                 }
             }
         }        
     }       
     
-
-// myGLCD.print(String(plantenBakSettings1[bak][i][LUCHTVOCHTIGHEID]) + "%", 60, (i*71) + 55);
-// myGLCD.print(String(plantenBakSettings1[bak][i][WATERGEVEN]) + "%", 140, (i*71) + 13);
-// myGLCD.print(String(plantenBakSettings1[bak][i][LAMPENVERVANGEN]) + "%", 140, (i*71) + 55);
     void tekenSettingsScherm(int bak) {
-         tekenSettingsOverzicht(bak);
-    Serial.println("begin tekenSettingsscherm");
+        tekenSettingsOverzicht(bak);
+        Serial.println("begin tekenSettingsscherm");
         currentPage = 2;
         Serial.print("currentPage = ");
         Serial.println(currentPage);
@@ -668,9 +681,6 @@ class TouchScreen {
             myGLCD.print("Back", 266, 221);
             myGLCD.print("Settings", 10, 221);
             while (currentPage == 2) {
-        
-        Serial.print("currentPage = ");
-        Serial.println(currentPage);
                 String test = "opnieuw";
                 if (currentPage ==2 && myTouch.dataAvailable()) {
                     myTouch.read();
@@ -680,20 +690,22 @@ class TouchScreen {
                         if ((x>=0) && (x<=80)) {
                             betast(2, 215, 80, 238);
                             tekenSettingsManipulatieScherm(bak);
-                            break;;
+                            Serial.println("TERUG UIT SETTINGSMANIPULATIESCHERM IN SETTINGS OVERZICHT");
+                            //delay(5000);
+                            break;
                         }
                         if ((x>=80) && (x<=160)) {
                             betast(82, 215, 160, 238);
-                            //break;
+                            break;
                         }
                         if ((x>=160) && (x<=240)) {
                             betast(162, 215, 240, 238);
-                            //break;
+                            break;
                         }
                         if ((x>=240) && (x<=320)) {
                             betast(242, 215, 318, 238);
-                            Serial.print("ikwas aangeraakt in settingsschermin ");
-                            //toonStartScherm(test);
+                            Serial.print("Back gedrukt in settingsscherm");
+                            toonStartScherm(test); //VERVANGEN DOOR BREAK IN KIES PLANTENBAK?????
                             currentPage = 0;
                             break;
                         }
@@ -768,8 +780,6 @@ class TouchScreen {
     void leesGetal(int plantbak, int seizoen, int kolom) {
         Serial.println("begin leesgetal");
         while (currentPage == 4) {
-            Serial.print("currentPage = ");
-            Serial.println(currentPage);
             if (currentPage == 4 && myTouch.dataAvailable()) {
                 myTouch.read();
                 x=myTouch.getX();
@@ -834,13 +844,11 @@ class TouchScreen {
                         myGLCD.setColor(0, 0, 0);
                         myGLCD.fillRect(0, 224, 319, 239);
                         }
-                        if ((x>=160) && (x<=300))  // Button: Enter
-                        {
+                    if ((x>=160) && (x<=300)) { // Button: Enter
                         betast(160, 130, 300, 180);
                         if (stCurrentLen>0) {
-                            for (x=0; x<stCurrentLen+1; x++)
-                            {
-                            stLast[x]=stCurrent[x];
+                            for (x=0; x<stCurrentLen+1; x++){
+                                stLast[x]=stCurrent[x];
                             }
                             stCurrent[0]='\0';
                             stCurrentLen=0;
@@ -850,38 +858,34 @@ class TouchScreen {
                             myGLCD.print(String(stLast), LEFT, 208);
                             int number = atoi(stLast);
                             customPlantenBakSettings[plantbak][seizoen][kolom] = number;
-                            
-                            // stCurrent[2]="";
-                            // stCurrentLen=0;
-                            // stLast[2]=""; 
+                            Serial.println("ENTER uit leesgetal gedrukt");
                             tekenSettingsManipulatieScherm(plantbak); 
-                        }   else  {
-                                myGLCD.setColor(255, 0, 0);
-                                myGLCD.print("BUFFER EMPTY", CENTER, 192);
-                                delay(500);
-                                myGLCD.print("            ", CENTER, 192);
-                                delay(500);
-                                myGLCD.print("BUFFER EMPTY", CENTER, 192);
-                                delay(500);
-                                myGLCD.print("            ", CENTER, 192);
-                                myGLCD.setColor(0, 255, 0);
-                            }
+                            break;
+                        } else {
+                            myGLCD.setColor(255, 0, 0);
+                            myGLCD.print("BUFFER EMPTY", CENTER, 192);
+                            delay(500);
+                            myGLCD.print("            ", CENTER, 192);
+                            delay(500);
+                            myGLCD.print("BUFFER EMPTY", CENTER, 192);
+                            delay(500);
+                            myGLCD.print("            ", CENTER, 192);
+                            myGLCD.setColor(0, 255, 0);
                         }
+                    }
                     }
                 }
                 if ((y>=210) && (y<=240)) {
                     if ((x>=240) && (x<=320)) {
                         betast(242, 215, 318, 238);
                         tekenSettingsManipulatieScherm(plantbak);
+                        Serial.println("Back in leesgetal gedrukt");
+                        break;
                     }
                 } 
         }
     }
 
-    
-
-
-// Draw a red frame while a button is touched
     void betast(int x1, int y1, int x2, int y2) {
         Serial.println("begin betast");
         myGLCD.setColor(VGA_GREEN);
@@ -892,9 +896,8 @@ class TouchScreen {
 
     void kiesPlantenBak() {
 
-        int gekozenBak = 3; //3 is niet bestaandebestaande plantenbak
-        Serial.println("in kiezen plantenbak = ");
-        //Serial.println(gekozenBak);
+        int gekozenBak = 15; //15 is niet bestaandebestaande plantenbak
+        //Serial.print("KIESBAK ");
         if (currentPage == 1 && myTouch.dataAvailable()) {
             Serial.println("aangeraakt in kiezen plantenbak = ");
             myTouch.read();
@@ -904,17 +907,20 @@ class TouchScreen {
                 gekozenBak = 0;
                 betast(2, 5, 315, 70);
                 tekenSettingsScherm(gekozenBak);
+                //MOET HIER GEEN BREAK?????? of current page =0
             }
             if ((y>=73) && (y<=143)) {// middelste bak
                 gekozenBak = 1;
                 betast(2, 76, 315, 141);
                 tekenSettingsScherm(gekozenBak);
+                //MOET HIER GEEN BREAK??????
                 
             }
-            if ((y>=130) && (y<=180)) { // Button: 3
+            if ((y>=130) && (y<=180)) { // onderste bak
                 gekozenBak = 2;
                 betast(2, 147, 315, 212);
                 tekenSettingsScherm(gekozenBak);
+                //MOET HIER GEEN BREAK??????
 
             }
         }
@@ -922,54 +928,55 @@ class TouchScreen {
 };
 
 class DataUitwisselaarMaster {
-  
-  public:
-  DataUitwisselaarMaster() {
-    pinMode(SS2, OUTPUT);
-    digitalWrite(SS2, HIGH);  // ensure SS stays high for now
-    SPI.begin ();// Put SCK, MOSI, SS pins into output mode// also put SCK, MOSI into LOW state, and SS into HIGH state// Then put SPI hardware into Master mode and turn SPI on
-    SPI.setClockDivider(SPI_CLOCK_DIV8); // Slow down the master a bit
-  }  
-  void zendOntvangData(){
-    byte b;
-    Serial.println("in zendontvangdata");
-    digitalWrite(SS2, LOW);// enable Slave Select
-    delayMicroseconds (200);
-    byte z = SPI.transfer (0xCD); //0xCD = 205 Verzend startcode 0xCD voor Slave
-    delayMicroseconds(20); //give the slave time to process
-    Serial.print("Na eerste verzonden byte is:");
-    Serial.println(0xCD);
-    Serial.print("eerste terugontvangen byte is: ");
-    Serial.println(z);
-    byte x = SPI.transfer (0xF3); //0xEF=243 is pumped to get response byte from slave
-    Serial.print("Na tweede verzonden byte is:");
-    Serial.println(0xF3);
-    delayMicroseconds(50); //give the slave time to process
-    Serial.print("tweede terugontvangen byte is: ");
-    Serial.println(x);
-    if (x == 0xEF){//0xEF=239
-        for ( byte i = 0 ; i < 3 ; i++){
-            for (byte j = 0 ; j < 31 ; j++){
-                b = (klimaatDataNu[i][j]);
-                byte y = SPI.transfer (b);
-                klimaatDataNu[i][j] = y;
-                delayMicroseconds(20); //give the slave time to process
-                Serial.print("verzonden byte is:");//deze print opdrachten zijn essientieel voor SPR
-                Serial.println(b);//deze print opdrachten zijn essientieel voor SPR
-                Serial.print("ontvangen byte is:");//deze print opdrachten zijn essientieel voor SPR
-                Serial.println(klimaatDataNu[i][j]);//deze print opdrachten zijn essientieel voor SPR
-                Serial.print(" / j is:");//deze print opdrachten zijn essientieel voor SPR
-                Serial.print(j);//deze print opdrachten zijn essientieel voor SPR
-                Serial.print(" / i is:");//deze print opdrachten zijn essientieel voor SPR
-                Serial.println(i);//deze print opdrachten zijn essientieel voor SPR
+
+    public:
+    DataUitwisselaarMaster() {
+        pinMode(SS2, OUTPUT);
+        digitalWrite(SS2, HIGH);  // ensure SS stays high for now
+        SPI.begin ();// Put SCK, MOSI, SS pins into output mode// also put SCK, MOSI into LOW state, and SS into HIGH state// Then put SPI hardware into Master mode and turn SPI on
+        SPI.setClockDivider(SPI_CLOCK_DIV8); // Slow down the master a bit
+    }  
+    void zendOntvangData(){
+        DefineSettingsNu::getSettingsNu();
+        byte b;
+        Serial.println("in zendontvangdata");
+        digitalWrite(SS2, LOW);// enable Slave Select
+        delayMicroseconds (200);
+        //byte verzenden1 = 0xCD;
+        byte z = SPI.transfer(0xCD); //0xCD = 205 Verzend startcode 0xCD voor Slave
+        delayMicroseconds(20); //give the slave time to process
+        // Serial.print("eerste verzonden byte is:");
+        // Serial.println(verzenden1);
+        Serial.print("eerste terugontvangen byte is: ");
+        Serial.println(z);
+        // byte verzenden2 = 0xF3;
+        byte x = SPI.transfer(0xF3); //0xEF=243 is pumped to get response byte from slave
+        // Serial.print("tweede verzonden byte is:");
+        // Serial.println(0xF3);
+        delayMicroseconds(50); //give the slave time to process
+        Serial.print("tweede terugontvangen byte is: ");
+        Serial.println(x);
+        if (x == 0xEF){//0xEF=239
+        Serial.println("verzonden data");
+            for ( byte i = 0 ; i < 3 ; i++){
+                Serial.println();
+                for (byte j = 5 ; j < 15 ; j++){
+                    b = (klimaatDataNu[i][j]);
+                    byte y = SPI.transfer (b);
+                    delayMicroseconds(20); //give the slave time to process
+                    klimaatDataNu[i][j+10] = y;
+                    delayMicroseconds(20); //give the slave time to process
+                    Serial.print("verzonden byte is:");//deze print opdrachten zijn essientieel voor SPR
+                    Serial.println(b);//deze print opdrachten zijn essientieel voor SPR
+                    Serial.print("ontvangen byte is:");//deze print opdrachten zijn essientieel voor SPR
+                    Serial.println(klimaatDataNu[i][j]);
+                }
             }
         }
+        digitalWrite(SS2, HIGH); // disable Slave Select
+        DefineSettingsNu::getSettingsNu();
+        Serial.println("=================");
     }
-    digitalWrite(SS2, HIGH); // disable Slave Select
-    //delay(2000);////DEZE MOET ERUIT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    Serial.println();
-    Serial.println("=================");
-  }
 };
 
 class Klok {
@@ -1072,17 +1079,8 @@ class Klok {
             klimaatDataNu[baknummer][DAG] = now.Day();
             klimaatDataNu[baknummer][UUR] = now.Hour();
             klimaatDataNu[baknummer][MINUUT] = now.Minute();
-            klimaatDataNu[baknummer][SECONDE] = now.Second();
+            //klimaatDataNu[baknummer][SECONDE] = now.Second();
         }
-        Serial.print("Year is: ");
-        Serial.println(now.Year());
-        Serial.print("Month is: ");
-        Serial.println(now.Month());
-        Serial.print("Day is: ");
-        Serial.println(now.Day());
-        Serial.print("Hour is: ");
-        Serial.println(now.Hour());
-
         return(now);
     }
     
@@ -1103,7 +1101,7 @@ class Klok {
 };
 
 
-DefineSettings defineSettings;
+//DefineSettingsNu defineSettingsNu;
 DataUitwisselaarMaster dataUitwisselaarMaster;
 TouchScreen touchScreen;
 Klok klok;
@@ -1116,41 +1114,21 @@ void setup (void){
 
 void loop(){
     Serial.println("nieuwe loop Master");
-    for ( byte i = 0 ; i < 3 ; i++){
-        for (byte j = 0 ; j < 31 ; j++){
-            Serial.print(klimaatDataNu[i][j]);
-        }
-       Serial.println();
-    }  
-    delay(2000);
     RtcDateTime tijd = klok.getTime();
-    defineSettings.getSettingsNu();
-    // for ( byte i = 0 ; i < 3 ; i++){
-    //     for (byte j = 0 ; j < 31 ; j++){
-    //         Serial.print(klimaatDataNu[i][j]);
-    //     }
-    //     Serial.println();
-
-    // }  
-    // delay(2000);
+    RtcDateTime tijd2;
+    //defineSettingsNu.getSettingsNu();
+    
     dataUitwisselaarMaster.zendOntvangData();
-
-    if(currentPage == 1 or currentPage == 0) { ///waar komt die nul vandaan????????
+    if(currentPage == 1 or currentPage == 0) { //0 wanneer terug uit settings schermen????????
         touchScreen.toonStartScherm(datumTijd);
     }
-    int teller = 150;//zorgt er voor dat het scherm langer gevoelig is
-    while ((currentPage == 1 or currentPage == 0) && teller > 0) {
+    int teller = tijd.Minute();
+    int teller2 = teller;
+    while ((currentPage == 1 or currentPage == 0) && teller == teller2) {//zonder die nul; hier alleen alleen 1; 0 wanneer terug uit settings schermen moet nieuwe loop beginnen
         touchScreen.kiesPlantenBak();
-        teller = teller-1;
-        Serial.print(teller);
+        tijd2 = klok.getTime();
+        teller2 = tijd2.Minute();
     }
     Serial.println();
-    // for ( byte i = 0 ; i < 3 ; i++){
-    //     for (byte j = 0 ; j < 31 ; j++){
-    //         Serial.print(klimaatDataNu[i][j]);
-    //     }
-    //     Serial.println();
-    // }
-    // delay(2000);
     Serial.println("einde loop Master");
 }
