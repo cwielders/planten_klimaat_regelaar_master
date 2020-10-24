@@ -6,7 +6,7 @@
 #include <SPI.h>
 #include <RtcDS3231.h>
 #include <Wire.h> // must be included here so that Arduino library object file references work (clock)
-
+#include <SD.h>
 
 
 #define MINPOTVOCHTIGHEID 0
@@ -63,14 +63,17 @@
 
 extern uint8_t BigFont[];
 extern uint8_t SmallFont[];
-String datumTijd = "Nog niet";
+String datumTijd;
 int currentPage; //indicates the page that is active on touchscreen
 
 int SS2 = 10; //Slave select pin voor SPI
 
 byte defaultPlantenBakSettings[3][4][12] = {{{25, 14, 60, 20, 75, 3, 0, 0}, {35, 28, 55, 10, 75, 2, 0, 0}, {11, 22, 33, 44, 55, 66, 77, 88, 99}, {0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0}}, {{8, 21, 20, 14, 4, 0, 70, 1}, {8, 22, 30, 20, 4, 1, 55, 1}, {8, 23, 35, 30, 4, 5, 85, 1}, {1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1}}, {{8, 21, 20, 14, 4, 0, 70, 2}, {8, 22, 30, 20, 4, 1, 55, 2}, {8, 23, 35, 30, 4, 5, 85, 2}, {2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2}}};
 byte customPlantenBakSettings[3][4][12] = {{{11, 22, 33, 44, 55, 66, 77, 88, 99}, {35, 28, 55, 10, 75, 2, 0, 0}, {30, 25, 35, 80, 4, 5, 85, 4, 1,13, 8}, {0, 0, 1, 1, 1, 1, 2, 2, 0, 0, 0, 0}}, {{8, 21, 20, 14, 4, 0, 70, 1, 20, 75}, {11, 22, 33, 44, 55, 66, 77, 88, 99}, {8, 23, 35, 30, 4, 5, 85, 1, 20, 75}, {1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1}}, {{8, 21, 20, 14, 4, 0, 70, 2, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 2, 20, 75}, {11, 22, 33, 44, 55, 66, 77, 88, 99}, {2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2}}};
-byte klimaatDataNu[3][38]= {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}};
+
+byte aantalPlantenBakken = 3;
+byte aantalKlimaatData = 38;
+byte klimaatDataNu[aantalPlantenBakken][aantalKlimaatData]= {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}};
 
 class DefineSettingsNu {
 
@@ -78,7 +81,7 @@ class DefineSettingsNu {
     DefineSettingsNu() {}
     
     static void getSettingsNu() {
-        Serial.print("in get settingsnu");
+        Serial.println("in get settingsnu");
         for (int plantenBakNummer = 0; plantenBakNummer < 3; plantenBakNummer++){
             klimaatDataNu[plantenBakNummer][PLANTENBAKNUMMER] = plantenBakNummer;
             int seizoenNu = customPlantenBakSettings[plantenBakNummer][3][(klimaatDataNu[plantenBakNummer][MAAND])-1];
@@ -96,19 +99,16 @@ class DefineSettingsNu {
                 case WINTER:
                     for (int i = 0; i < 10; i++) {
                         klimaatDataNu[plantenBakNummer][i] = customPlantenBakSettings[plantenBakNummer][WINTER][i];
-                        Serial.print("Winter in get settings");
                     }
                     break;
                 case ZOMER:
                     for (int i = 0; i < 10; i++) {
                         klimaatDataNu[plantenBakNummer][i] = customPlantenBakSettings[plantenBakNummer][ZOMER][i];
-                        Serial.print("Zomer in get settings");
                 }
                     break;
                 case REGEN:
                     for (int i = 0; i < 10; i++) {
                         klimaatDataNu[plantenBakNummer][i] = customPlantenBakSettings[plantenBakNummer][REGEN][i];
-                        Serial.print("Regen in get settings");
                     }
                     break;
             }       
@@ -152,7 +152,7 @@ class DefineSettingsNu {
                 }
             //klimaatDataNu[plantenBakNummer][ISBEWOLKING] = isBewolking;
         }
-        Serial.println("klimaatDataNu");
+        Serial.println("klimaatDataNu is");
         for ( byte i = 0 ; i < 3 ; i++){
             for (byte j = 0 ; j < 33 ; j++){
                 Serial.print(klimaatDataNu[i][j]);
@@ -429,7 +429,7 @@ class TouchScreen {
         int variable;
         currentPage = 3;
         Serial.print(" currentPage = ");
-        Serial.print(currentPage);
+        Serial.println(currentPage);
         myGLCD.setColor(VGA_BLACK);
         myGLCD.setBackColor(VGA_BLACK);
         myGLCD.fillRoundRect(2, 215, 80, 238);
@@ -446,12 +446,20 @@ class TouchScreen {
         myGLCD.print("Mai", 58, 221);
         myGLCD.print("Manaus", 99, 221);
         myGLCD.print("Sumatra", 175, 221);
+    
+    
+    // myGLCD.setColor(VGA_WHITE);
+    // myGLCD.fillRoundRect(2, (i*71) + 2, 318, (i*71) + 71);
         while (currentPage == 3) {
             if (currentPage == 3 && myTouch.dataAvailable()) {
                 myTouch.read();
                 x=myTouch.getX();
                 y=myTouch.getY();
-                if ((y>=210) && (y<=240)) {
+                Serial.print("x=");
+                Serial.println(x);
+                Serial.print("y=");
+                Serial.println(y);
+                if ((y>=205) && (y<=240)) {//if ((y>=210) && (y<=240)) {
                     if ((x>=0) && (x<=80)) {
                         betast(2, 215, 80, 238);
                         for(int i=0; i<4; i++) {
@@ -460,7 +468,6 @@ class TouchScreen {
                             }
                         }
                         tekenSettingsManipulatieScherm(bak);
-                        //toonStartScherm("changmai");
                     }
                     if ((x>=80) && (x<=160)) {
                         betast(82, 215, 160, 238);
@@ -469,7 +476,6 @@ class TouchScreen {
                                 customPlantenBakSettings[bak][i][j] = defaultPlantenBakSettings[MANAUS][i][j];
                             }
                         }
-                        //toonStartScherm("minaus");
                         tekenSettingsManipulatieScherm(bak);
                     }
                     if ((x>=160) && (x<=240)) {
@@ -483,8 +489,6 @@ class TouchScreen {
                     }
                     if ((x>=240) && (x<=320)) {
                         betast(242, 215, 318, 238);
-                        String test = "back pressed";    //terugveranderen                        
-                        //DefineSettingsNu::getSettingsNu();
                         Serial.println("BACK GEDRUKT IN SETTINGSSCHERM");
                         Serial.println("customPlantenBakSettings");
                         for ( int i = 0 ; i < 3 ; i++){
@@ -497,39 +501,40 @@ class TouchScreen {
                             }
                         Serial.println();
                         }
-                        toonStartScherm(test);//VERVANGEN DOOR BREAK IN KIES PLANTENBAK??????
                         currentPage = 0;
                         break;
                     }
                 }
                 for(int i=0;i<3;i++) {
                     int seizoen = i;
-                    if ((y<=(i*71) + 29) && (y>=(i*71) + 13) && (x>=29 && x<=61)) { 
+                    //if ((y<=(i*71) + 29) && (y>=(i*71) + 13) && (x>=29 && x<=61)) { 
+                    if ((y<=(i*71) + 20) && (y>=(i*71) + 5) && (x>=29 && x<=61)) { 
                     drawButtons();
                     variable = NACHTTEMPERATUUR;
                     leesGetal(bak, seizoen, variable);
                     }
-                    if ((y<=(i*71) + 29) && (y>=(i*71) + 13) && (x>=85 && x<=117)) { 
+                    if ((y<=(i*71) + 20) && (y>=(i*71) + 5) && (x>=85 && x<=117)) { 
                     drawButtons();
                     variable = DAGTEMPERATUUR;
                     leesGetal(bak, seizoen, variable);
                     }
-                    if ((y<=(i*71) + 29) && (y>=(i*71) + 13) && (x>=200 && x<=232)) { 
+                    if ((y<=(i*71) + 20) && (y>=(i*71) + 5) && (x>=200 && x<=232)) { 
                     drawButtons();
                     variable = DUURDAG;
                     leesGetal(bak, seizoen, variable);
                     }
-                    if ((y<=(i*71) + 29) && (y>=(i*71) + 13) && (x>=270 && x<=338)) { 
+                    if ((y<=(i*71) + 20) && (y>=(i*71) + 5) && (x>=270 && x<=338)) { 
                     drawButtons();
                     //variable = STARTDAG;
                     leesGetal(bak, seizoen, variable);
                     }
-                    if ((y<=(i*71) + 29) && (y>=(i*71) + 13) && (x>=140 && x<=172)) { 
+                    if ((y<=(i*71) + 20) && (y>=(i*71) + 5) && (x>=140 && x<=172)) { 
                     drawButtons();
                     variable = WATERGEVEN;
                     leesGetal(bak, seizoen, variable);
                     }
-                    if ((y<=(i*71) + 71) && (y>=(i*71) + 55) && (x>=60 && x<=92)) { 
+                    //if ((y<=(i*71) + 71) && (y>=(i*71) + 55) && (x>=60 && x<=92)) { 
+                    if ((y<=(i*71) + 62) && (y>=(i*71) + 47) && (x>=60 && x<=92)) { 
                     drawButtons();
                     variable = LUCHTVOCHTIGHEID;
                     leesGetal(bak, seizoen, variable);
@@ -679,6 +684,7 @@ class TouchScreen {
             myGLCD.drawRoundRect(162, 215, 240, 238);
             myGLCD.drawRoundRect(242, 215, 318, 238);
             myGLCD.print("Back", 266, 221);
+            myGLCD.print("Grafieken", 88, 221);
             myGLCD.print("Settings", 10, 221);
             while (currentPage == 2) {
                 String test = "opnieuw";
@@ -691,11 +697,11 @@ class TouchScreen {
                             betast(2, 215, 80, 238);
                             tekenSettingsManipulatieScherm(bak);
                             Serial.println("TERUG UIT SETTINGSMANIPULATIESCHERM IN SETTINGS OVERZICHT");
-                            //delay(5000);
                             break;
                         }
                         if ((x>=80) && (x<=160)) {
                             betast(82, 215, 160, 238);
+                            drawGraphs(1, 2, bak);
                             break;
                         }
                         if ((x>=160) && (x<=240)) {
@@ -705,7 +711,7 @@ class TouchScreen {
                         if ((x>=240) && (x<=320)) {
                             betast(242, 215, 318, 238);
                             Serial.print("Back gedrukt in settingsscherm");
-                            toonStartScherm(test); //VERVANGEN DOOR BREAK IN KIES PLANTENBAK?????
+                            //toonStartScherm(test); //VERVANGEN DOOR BREAK IN KIES PLANTENBAK?????
                             currentPage = 0;
                             break;
                         }
@@ -713,6 +719,154 @@ class TouchScreen {
                 }
         }
     }
+
+    void drawGraphs (int nomberOfDataPoints, int lineColour, int plantenBakNummer) {
+
+        int buf[318];
+        int x, x2;
+        int y, y2;
+        int r;
+        
+        currentPage = 5;
+        Serial.print(" currentPage = ");
+        Serial.println(currentPage);
+        
+        // Clear the screen and draw the frame
+        myGLCD.clrScr();
+        myGLCD.setFont(SmallFont);
+        myGLCD.setColor(VGA_WHITE);
+        myGLCD.drawRoundRect(2, 215, 80, 238);
+        myGLCD.drawRoundRect(82, 215, 160, 238);
+        myGLCD.drawRoundRect(162, 215, 240, 238);
+        myGLCD.drawRoundRect(242, 215, 318, 238);
+        myGLCD.print("Back", 266, 221);
+        myGLCD.print("Week", 24, 221);
+        myGLCD.print("Maand", 102, 221);
+        myGLCD.print("Jaar", 187, 221);
+        //myGLCD.setColor(VGA_GREEN);
+        //myGLCD.drawRect(0, 14, 319, 225);
+        myGLCD.setColor(VGA_RED);
+        myGLCD.fillRect(0, 0, 319, 13);
+        myGLCD.setColor(255, 255, 255);
+        myGLCD.setBackColor(VGA_RED);
+        myGLCD.print("*Titel Grafiek*", CENTER, 1);
+
+    // Draw crosshairs
+        myGLCD.setColor(0, 0, 255);
+        myGLCD.setBackColor(0, 0, 0);
+        myGLCD.drawLine(25, 25, 25, 200);
+        for (int i=25; i<200; i+=10)
+            myGLCD.drawLine(25, i, 29, i);
+        myGLCD.drawLine(297, 25, 297, 200);
+        for (int i=25; i<200; i+=10)
+            myGLCD.drawLine(293, i, 297, i);
+        myGLCD.drawLine(25, 200, 297, 200);
+        for (int i=25; i<297; i+=10)
+            myGLCD.drawLine(i, 196, i, 200);
+           
+    // Draw sin-, cos- and tan-lines  
+        myGLCD.setColor(0,255,255);
+        myGLCD.print("Hum", 35, 15);
+        for (int i=1; i<318; i++)
+        {
+            myGLCD.drawPixel(i,119+(sin(((i*1.13)*3.14)/180)*95));
+        }
+        
+        myGLCD.setColor(255,0,0);
+        myGLCD.print("Temp", 35, 27);
+        for (int i=1; i<318; i++)
+        {
+            myGLCD.drawPixel(i,119+(cos(((i*1.13)*3.14)/180)*95));
+        }
+
+        myGLCD.setColor(255,255,0);
+        myGLCD.print("Pot", 35, 39);
+        for (int i=1; i<318; i++)
+        {
+            myGLCD.drawPixel(i,119+(tan(((i*1.13)*3.14)/180)));
+        }
+
+  
+        // myGLCD.setColor(0,0,0);
+        // myGLCD.fillRect(1,15,318,224);
+        // myGLCD.setColor(0, 0, 255);
+        // myGLCD.setBackColor(0, 0, 0);
+        // myGLCD.drawLine(159, 15, 159, 224);
+        // myGLCD.drawLine(1, 119, 318, 119);
+
+
+        
+        while (currentPage == 5) {
+            if (currentPage == 5 && myTouch.dataAvailable()) {
+                myTouch.read();
+                x=myTouch.getX();
+                y=myTouch.getY();
+                Serial.print("x=");
+                Serial.println(x);
+                Serial.print("y=");
+                Serial.println(y);
+                if ((y>=205) && (y<=240)) {  //if ((y>=210) && (y<=240)) //{
+                    // if ((x>=0) && (x<=80)) {
+                    //     betast(2, 215, 80, 238);
+                    //     for(int i=0; i<4; i++) {
+                    //         for(int j=0; j<12; j++) {
+                    //             customPlantenBakSettings[bak][i][j] = defaultPlantenBakSettings[CHIANGMAI][i][j];
+                    //         }
+                    //     }
+                    //     tekenSettingsManipulatieScherm(bak);
+                    // }
+                    // if ((x>=80) && (x<=160)) {
+                    //     betast(82, 215, 160, 238);
+                    //     for(int i=0; i<3; i++) {
+                    //         for(int j=0; j<12; j++) {
+                    //             customPlantenBakSettings[bak][i][j] = defaultPlantenBakSettings[MANAUS][i][j];
+                    //         }
+                    //     }
+                    //     tekenSettingsManipulatieScherm(bak);
+                    // }
+                    // if ((x>=160) && (x<=240)) {
+                    //     betast(162, 215, 240, 238);
+                    //     for(int i=0; i<3; i++) {
+                    //         for(int j=0; j<12; j++) {
+                    //             customPlantenBakSettings[bak][i][j] = defaultPlantenBakSettings[SUMATRA][i][j];
+                    //         }
+                    //     }
+                    //     tekenSettingsManipulatieScherm(bak);
+                    // }
+                    if ((x>=240) && (x<=320)) {
+                        betast(242, 215, 318, 238);
+                        Serial.println("BACK GEDRUKT IN Grafieken");
+                        tekenSettingsScherm(plantenBakNummer);
+                        break;
+                    }
+                }
+            }
+        }
+    }    
+
+// Draw a moving sinewave
+//   x=1;
+//   for (int i=1; i<(318*20); i++) 
+//   {
+//     x++;
+//     if (x==319)
+//       x=1;
+//     if (i>319)
+//     {
+//       if ((x==159)||(buf[x-1]==119))
+//         myGLCD.setColor(0,0,255);
+//       else
+//         myGLCD.setColor(0,0,0);
+//       myGLCD.drawPixel(x,buf[x-1]);
+//     }
+//     myGLCD.setColor(0,255,255);
+//     y=119+(sin(((i*1.1)*3.14)/180)*(90-(i / 100)));
+//     myGLCD.drawPixel(x,y);
+//     buf[x-1]=y;
+  
+
+
+
 
     void drawButtons() {
         currentPage = 4;
@@ -896,6 +1050,7 @@ class TouchScreen {
 
     void kiesPlantenBak() {
 
+
         int gekozenBak = 15; //15 is niet bestaandebestaande plantenbak
         //Serial.print("KIESBAK ");
         if (currentPage == 1 && myTouch.dataAvailable()) {
@@ -907,21 +1062,20 @@ class TouchScreen {
                 gekozenBak = 0;
                 betast(2, 5, 315, 70);
                 tekenSettingsScherm(gekozenBak);
-                //MOET HIER GEEN BREAK?????? of current page =0
+                Serial.print("Terug in kiesbak, waar gaat ie nu heen?");
+                currentPage = 0;
             }
             if ((y>=73) && (y<=143)) {// middelste bak
                 gekozenBak = 1;
                 betast(2, 76, 315, 141);
                 tekenSettingsScherm(gekozenBak);
-                //MOET HIER GEEN BREAK??????
-                
+                currentPage = 0; 
             }
             if ((y>=130) && (y<=180)) { // onderste bak
                 gekozenBak = 2;
                 betast(2, 147, 315, 212);
                 tekenSettingsScherm(gekozenBak);
-                //MOET HIER GEEN BREAK??????
-
+                currentPage = 0;
             }
         }
     }
@@ -942,42 +1096,123 @@ class DataUitwisselaarMaster {
         Serial.println("in zendontvangdata");
         digitalWrite(SS2, LOW);// enable Slave Select
         delayMicroseconds (200);
-        //byte verzenden1 = 0xCD;
         byte z = SPI.transfer(0xCD); //0xCD = 205 Verzend startcode 0xCD voor Slave
         delayMicroseconds(20); //give the slave time to process
-        // Serial.print("eerste verzonden byte is:");
-        // Serial.println(verzenden1);
-        Serial.print("eerste terugontvangen byte is: ");
-        Serial.println(z);
-        // byte verzenden2 = 0xF3;
         byte x = SPI.transfer(0xF3); //0xEF=243 is pumped to get response byte from slave
-        // Serial.print("tweede verzonden byte is:");
-        // Serial.println(0xF3);
         delayMicroseconds(50); //give the slave time to process
         Serial.print("tweede terugontvangen byte is: ");
         Serial.println(x);
         if (x == 0xEF){//0xEF=239
-        Serial.println("verzonden data");
+        Serial.println("verzonden data is");
             for ( byte i = 0 ; i < 3 ; i++){
-                Serial.println();
                 for (byte j = 5 ; j < 15 ; j++){
                     b = (klimaatDataNu[i][j]);
                     byte y = SPI.transfer (b);
                     delayMicroseconds(20); //give the slave time to process
                     klimaatDataNu[i][j+10] = y;
-                    delayMicroseconds(20); //give the slave time to process
-                    Serial.print("verzonden byte is:");//deze print opdrachten zijn essientieel voor SPR
-                    Serial.println(b);//deze print opdrachten zijn essientieel voor SPR
-                    Serial.print("ontvangen byte is:");//deze print opdrachten zijn essientieel voor SPR
-                    Serial.println(klimaatDataNu[i][j]);
+                    Serial.print(klimaatDataNu[i][j]);
+                    Serial.print("/");
                 }
+                Serial.println();
             }
         }
         digitalWrite(SS2, HIGH); // disable Slave Select
-        DefineSettingsNu::getSettingsNu();
-        Serial.println("=================");
+        Serial.println();
     }
 };
+
+class KlimaatDataLogger {
+    
+    File myFile;
+    int csPin = 53;
+    String naamFile = "datafile.txt";
+    byte numberBytesWritten;
+
+    public:
+    KlimaatDataLogger() :
+        myFile()
+    {
+        pinMode(53, OUTPUT);
+    }
+
+    void setup() {
+        Serial.begin(9600);
+        Serial.print("Initializing card...");
+        if (!SD.begin(csPin)) {
+            Serial.println("initialization of the SD card failed!");
+            return;
+        }
+        Serial.println("initialization of the SDcard");
+        Serial.print("Creating file named: ");
+        Serial.print(naamFile);
+        myFile = SD.open(naamFile, FILE_WRITE);
+    }
+    
+    void writeToFile() {
+        myFile = SD.open(naamFile, FILE_WRITE);
+        if (myFile) {
+            Serial.print("Writing to the text file...");
+            for(int plantenbak = 0; plantenbak < 3; plantenbak++) {
+                for(int variable = 0; variable < 38; variable++) {
+                    myFile.print(klimaatDataNu[plantenbak][variable]);
+                    myFile.print(",");
+                    Serial.print(klimaatDataNu[plantenbak][variable]);
+                    Serial.print(",");
+                }
+            }
+            myFile.print("\n");
+            myFile.close(); // close the file:
+            Serial.println("done closing.");
+        } 
+        else {
+            // if the file didn't open, report an error:
+            Serial.println("error opening the text file!");
+        }
+    }
+
+    void readFromFile() {
+        myFile = SD.open(naamFile);
+        Serial.println(naamFile);
+        String inString = "";
+        if (myFile) {
+            Serial.println("datafile.txt bevat het volgende:");
+            // read all the text written on the file
+            while (myFile.available()) {
+                char inChar =myFile.read();
+               //Serial.println("Hier ben ik 1");
+                if (isDigit(inChar)) {
+                    inString = inString + inChar;
+                }              
+                if (inChar == ',') {     // if you get a comma:
+                    int a = inString.toInt();
+                    Serial.print(a);
+                    Serial.print(",");
+                    inString = ""; // clear the string for new input:
+                }
+            }
+            Serial.print("/n");
+            myFile.close(); // close the file:
+            Serial.println("done closing.");
+        }   else {
+                // if the file didn't open, report an error:
+                Serial.println("error opening the text file!");
+            }
+    }
+
+    // String maakKlimaatDataString() {
+    //     String a;
+    //     String result;
+    //     for(int plantenbak = 0; plantenbak < 3; plantenbak++) {
+    //         for(int variable = 0; variable < 38; variable++) {
+    //             a = klimaatDataNu[plantenbak][variable];
+    //             result = result + a + ",";
+    //         }
+    //     }
+    //     result = result + "\n";
+    //     return result;
+    // }
+};
+
 
 class Klok {
     
@@ -991,84 +1226,59 @@ class Klok {
     void setup () {
         
         Serial.print("compiled: ");
-        Serial.println(__DATE__);
+        Serial.print(__DATE__);
         Serial.println(__TIME__);
-
         Rtc.Begin();
-
         RtcDateTime compiled = RtcDateTime(__DATE__, __TIME__);
-        Serial.print("Dit is de gecompileerde tijd: ");
-        printDateTime(compiled);
-        Serial.println();
-
-        if (!Rtc.IsDateTimeValid())
-        {
-            if (Rtc.LastError() != 0)
-            {
-                // we have a communications error
-                // see https://www.arduino.cc/en/Reference/WireEndTransmission for 
-                // what the number means
+        // Serial.print("Rtc: ");
+        // //printDateTime(Rtc);
+        // String dateTime = geefDatumTijdString(Rtc);
+        // Serial.println(dateTime);
+        if (!Rtc.IsDateTimeValid()) {
+            if (Rtc.LastError() != 0) {
+                // we have a communications error see https://www.arduino.cc/en/Reference/WireEndTransmission for what the number means
                 Serial.print("RTC communications error = ");
                 Serial.println(Rtc.LastError());
             }
-            else
-            {
+            else {
                 // Common Causes:
                 //    1) first time you ran and the device wasn't running yet
                 //    2) the battery on the device is low or even missing
-
                 Serial.println("RTC lost confidence in the DateTime!");
-
                 // following line sets the RTC to the date & time this sketch was compiled
                 // it will also reset the valid flag internally unless the Rtc device is
                 // having an issue
-
                 Rtc.SetDateTime(compiled);
             }
         }
-
-        if (!Rtc.GetIsRunning())
-        {
+        if (!Rtc.GetIsRunning()) {
             Serial.println("RTC was not actively running, starting now");
             Rtc.SetIsRunning(true);
         }
-
         RtcDateTime now = Rtc.GetDateTime();
-        if (now < compiled) 
-        {
+        if (now < compiled) {
             Serial.println("RTC is older than compile time!  (Updating DateTime)");
             Rtc.SetDateTime(compiled);
         }
-        else if (now > compiled) 
-        {
+        else if (now > compiled) {
             Serial.println("RTC is newer than compile time. (this is expected)");
-        }
-        else if (now == compiled) 
-        {
+        } else if (now == compiled) {
             Serial.println("RTC is the same as compile time! (not expected but all is fine)");
         }
-
-        // never assume the Rtc was last configured by you, so
-        // just clear them to your needed state
+        // never assume the Rtc was last configured by you, so just clear them to your needed state
         Rtc.Enable32kHzPin(false);
         Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeNone); 
         Serial.println("Klok geinitieerd");
-        //String dateTime = geefDatumString(now);
-        //return dateTime;
     }
 
     RtcDateTime getTime(){
-        if (!Rtc.IsDateTimeValid()) 
-        {
+        if (!Rtc.IsDateTimeValid()) {
             if (Rtc.LastError() != 0) {
-            // we have a communications error
-            // see https://www.arduino.cc/en/Reference/WireEndTransmission for 
-            // what the number means
+            // we have a communications error see https://www.arduino.cc/en/Reference/WireEndTransmission for what the number means
             Serial.print("RTC communications error = ");
             Serial.println(Rtc.LastError());
             }   else {
-                // Common Causes:
-                //    1) the battery on the device is low or even missing and the power line was disconnected
+                // Common Cause: the battery on the device is low or even missing and the power line was disconnected
                 Serial.println("RTC lost confidence in the DateTime! Check battery");
             }
         }
@@ -1079,56 +1289,67 @@ class Klok {
             klimaatDataNu[baknummer][DAG] = now.Day();
             klimaatDataNu[baknummer][UUR] = now.Hour();
             klimaatDataNu[baknummer][MINUUT] = now.Minute();
-            //klimaatDataNu[baknummer][SECONDE] = now.Second();
         }
         return(now);
     }
-    
-    void printDateTime(const RtcDateTime& dt) {
-        char datestring[20];
 
+    String geefDatumTijdString(const RtcDateTime& dt) {
+        char datestring[17];
         snprintf_P(datestring, 
         countof(datestring),
-        PSTR("%02u/%02u/%04u %02u:%02u:%02u"),
+        PSTR("%02u/%02u/%04u %02u:%02u"),
         dt.Day(),
         dt.Month(),
         dt.Year(),
         dt.Hour(),
-        dt.Minute(),
-        dt.Second() );
-        Serial.println(datestring);
+        dt.Minute());
+        return(datestring);
     }
 };
 
-
-//DefineSettingsNu defineSettingsNu;
 DataUitwisselaarMaster dataUitwisselaarMaster;
 TouchScreen touchScreen;
 Klok klok;
+KlimaatDataLogger klimaatDataLogger;
 
 void setup (void){
     Serial.begin (9600);
     klok.setup();
     touchScreen.setup();
+    klimaatDataLogger.setup();
+    delay(5000); //give Slave time to prepare for transfer
+    dataUitwisselaarMaster.zendOntvangData();//zodat eerste meting is gedaan voordat scherm aangaat
 }
 
 void loop(){
+    
     Serial.println("nieuwe loop Master");
     RtcDateTime tijd = klok.getTime();
-    RtcDateTime tijd2;
-    //defineSettingsNu.getSettingsNu();
-    
+    datumTijd = klok.geefDatumTijdString(tijd); 
     dataUitwisselaarMaster.zendOntvangData();
-    if(currentPage == 1 or currentPage == 0) { //0 wanneer terug uit settings schermen????????
+    
+    if(currentPage == 1 or currentPage == 0) { //0 wanneer terug uit settings schermen
         touchScreen.toonStartScherm(datumTijd);
     }
+    
+    
+    //String klimaatDataString = klimaatDataLogger.maakKlimaatDataString();
+    //Serial.println(klimaatDataString);
+    klimaatDataLogger.writeToFile();
+    klimaatDataLogger.readFromFile();
+    
+    RtcDateTime tijd2;
     int teller = tijd.Minute();
     int teller2 = teller;
-    while ((currentPage == 1 or currentPage == 0) && teller == teller2) {//zonder die nul; hier alleen alleen 1; 0 wanneer terug uit settings schermen moet nieuwe loop beginnen
+
+    while (teller == teller2) {
         touchScreen.kiesPlantenBak();
         tijd2 = klok.getTime();
         teller2 = tijd2.Minute();
+        if (currentPage == 0){
+            break;
+        }
     }
-    Serial.println();
     Serial.println("einde loop Master");
+    Serial.println();
 }
