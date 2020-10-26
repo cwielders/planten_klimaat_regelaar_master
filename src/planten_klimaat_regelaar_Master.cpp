@@ -65,15 +65,17 @@ extern uint8_t BigFont[];
 extern uint8_t SmallFont[];
 String datumTijd;
 int currentPage; //indicates the page that is active on touchscreen
-
 int SS2 = 10; //Slave select pin voor SPI
+int lengteXAs =288;
+int csPin = 53;
+String naamFile = "DATAFILE.TXT";
 
 byte defaultPlantenBakSettings[3][4][12] = {{{25, 14, 60, 20, 75, 3, 0, 0}, {35, 28, 55, 10, 75, 2, 0, 0}, {11, 22, 33, 44, 55, 66, 77, 88, 99}, {0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0}}, {{8, 21, 20, 14, 4, 0, 70, 1}, {8, 22, 30, 20, 4, 1, 55, 1}, {8, 23, 35, 30, 4, 5, 85, 1}, {1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1}}, {{8, 21, 20, 14, 4, 0, 70, 2}, {8, 22, 30, 20, 4, 1, 55, 2}, {8, 23, 35, 30, 4, 5, 85, 2}, {2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2}}};
 byte customPlantenBakSettings[3][4][12] = {{{11, 22, 33, 44, 55, 66, 77, 88, 99}, {35, 28, 55, 10, 75, 2, 0, 0}, {30, 25, 35, 80, 4, 5, 85, 4, 1,13, 8}, {0, 0, 1, 1, 1, 1, 2, 2, 0, 0, 0, 0}}, {{8, 21, 20, 14, 4, 0, 70, 1, 20, 75}, {11, 22, 33, 44, 55, 66, 77, 88, 99}, {8, 23, 35, 30, 4, 5, 85, 1, 20, 75}, {1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1}}, {{8, 21, 20, 14, 4, 0, 70, 2, 20, 75}, {8, 22, 30, 20, 4, 1, 55, 2, 20, 75}, {11, 22, 33, 44, 55, 66, 77, 88, 99}, {2, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2}}};
 
-byte aantalPlantenBakken = 3;
-byte aantalKlimaatData = 38;
-byte klimaatDataNu[aantalPlantenBakken][aantalKlimaatData]= {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}};
+int aantalPlantenBakken = 3;
+int aantalKlimaatData = 38;
+byte klimaatDataNu[3][38] = {{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32},{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32}};
 
 class DefineSettingsNu {
 
@@ -164,22 +166,28 @@ class DefineSettingsNu {
 };
 
 class TouchScreen {
-    
+        
+    File myFile;
     UTFT myGLCD;
     URTouch myTouch;
     UTFT_Buttons myButtons;
-    
+     
     int x, y;
     char stCurrent[2]="";
     int stCurrentLen=0;
-    char stLast[2]=""; 
+    char stLast[2]="";
+    int csPin = 53;
+    String naamFile = "DATAFILE.TXT"; 
 
     public:
     TouchScreen() :
     myGLCD(CTE32_R2,38,39,40,41),
     myTouch( 6, 5, 4, 3, 2),
-    myButtons(&myGLCD, &myTouch)
-    {}
+    myButtons(&myGLCD, &myTouch),
+    myFile()
+    {
+        pinMode(53, OUTPUT);
+    }
 
     void setup() {
         
@@ -754,16 +762,18 @@ class TouchScreen {
     // Draw crosshairs
         myGLCD.setColor(0, 0, 255);
         myGLCD.setBackColor(0, 0, 0);
-        myGLCD.drawLine(25, 25, 25, 200);
-        for (int i=25; i<200; i+=10)
-            myGLCD.drawLine(25, i, 29, i);
-        myGLCD.drawLine(297, 25, 297, 200);
-        for (int i=25; i<200; i+=10)
-            myGLCD.drawLine(293, i, 297, i);
-        myGLCD.drawLine(25, 200, 297, 200);
-        for (int i=25; i<297; i+=10)
+        myGLCD.drawLine(16, 16, 16, 200);
+        for (int i=16; i<200; i+=10)
+            myGLCD.drawLine(16, i, 20, i);
+        myGLCD.drawLine(304, 16, 304, 200);
+        for (int i=16; i<200; i+=10)
+            myGLCD.drawLine(300, i, 304, i);
+        myGLCD.drawLine(16, 200, 304, 200);
+        for (int i=16; i<304; i+=12)
             myGLCD.drawLine(i, 196, i, 200);
-           
+
+
+        readDataPointsFromFile(0, DAGTEMPERATUUR);   
     // Draw sin-, cos- and tan-lines  
         myGLCD.setColor(0,255,255);
         myGLCD.print("Hum", 35, 15);
@@ -844,30 +854,73 @@ class TouchScreen {
         }
     }    
 
-// Draw a moving sinewave
-//   x=1;
-//   for (int i=1; i<(318*20); i++) 
-//   {
-//     x++;
-//     if (x==319)
-//       x=1;
-//     if (i>319)
-//     {
-//       if ((x==159)||(buf[x-1]==119))
-//         myGLCD.setColor(0,0,255);
-//       else
-//         myGLCD.setColor(0,0,0);
-//       myGLCD.drawPixel(x,buf[x-1]);
-//     }
-//     myGLCD.setColor(0,255,255);
-//     y=119+(sin(((i*1.1)*3.14)/180)*(90-(i / 100)));
-//     myGLCD.drawPixel(x,y);
-//     buf[x-1]=y;
-  
-
-
-
-
+    void readDataPointsFromFile(int myPlantenBakNummer, int mySoortKlimaatData) {
+        int plantenBakNummer = myPlantenBakNummer;
+        int soortKlimaatData = mySoortKlimaatData;
+        int inInt = 0;
+        int aantalKommas = 0;
+        int positieXAs = 0;        
+        int grafiekData[288];
+        char inChar;
+        String inString = "";
+        boolean flag1 = true;
+        
+        myFile = SD.open(naamFile);
+        Serial.println(naamFile);
+        if (myFile) {
+            while (myFile.available() && positieXAs < 288) {
+                inChar =myFile.read();
+                if (inChar == ',') {
+                    aantalKommas++;
+                    if (flag1 && aantalKommas == ((plantenBakNummer * aantalKlimaatData) + (soortKlimaatData +1))) {
+                        // Serial.print("flag1 true");
+                        aantalKommas = 1;
+                        inChar = myFile.read();
+                        while (isDigit(inChar)) {
+                            inString = inString + inChar;
+                            inChar = myFile.read();
+                        }
+                        inInt = inString.toInt();
+                        myGLCD.drawPixel(inInt, (positieXAs+16));
+                        inString = ""; // clear the string for new input:
+                        Serial.print("[");
+                        Serial.print(inInt);
+                        Serial.print(",");
+                        grafiekData[positieXAs] = inInt;
+                        Serial.print(positieXAs);
+                        Serial.print("]");
+                        positieXAs++;
+                        flag1 = false;
+                    }
+                    if (!flag1 && aantalKommas % (aantalPlantenBakken * aantalKlimaatData) == 0 ) {
+                        //Serial.print("flag1 false");
+                        aantalKommas = 1;
+                        inChar = myFile.read();
+                        while (isDigit(inChar)) {
+                            inString = inString + inChar;
+                            inChar = myFile.read();
+                        }
+                        inInt = inString.toInt();
+                        myGLCD.drawPixel((positieXAs+16), inInt);
+                        inString = ""; // clear the string for new input:
+                        Serial.print("[");
+                        Serial.print(inInt);
+                        Serial.print(",");
+                        grafiekData[positieXAs] = inInt;
+                        Serial.print(positieXAs);
+                        Serial.print("]");
+                        positieXAs++;
+                        flag1 = false;
+                    }
+                }              
+            } 
+            myFile.close(); // close the file:
+            Serial.println("done closing.");           
+        } 
+        else {
+            Serial.println("error opening the text file!");// if the file didn't open, report an error:
+        }
+    }
     void drawButtons() {
         currentPage = 4;
     Serial.println("begin drawbuttons");
@@ -1124,10 +1177,7 @@ class DataUitwisselaarMaster {
 class KlimaatDataLogger {
     
     File myFile;
-    int csPin = 53;
-    String naamFile = "datafile.txt";
-    byte numberBytesWritten;
-
+    
     public:
     KlimaatDataLogger() :
         myFile()
@@ -1152,12 +1202,13 @@ class KlimaatDataLogger {
         myFile = SD.open(naamFile, FILE_WRITE);
         if (myFile) {
             Serial.print("Writing to the text file...");
-            for(int plantenbak = 0; plantenbak < 3; plantenbak++) {
-                for(int variable = 0; variable < 38; variable++) {
-                    myFile.print(klimaatDataNu[plantenbak][variable]);
+            for(int plantenbak = 0; plantenbak < aantalPlantenBakken; plantenbak++) {
+                for(int variable = 0; variable < aantalKlimaatData; variable++) {
                     myFile.print(",");
-                    Serial.print(klimaatDataNu[plantenbak][variable]);
+                    myFile.print(klimaatDataNu[plantenbak][variable]);
                     Serial.print(",");
+                    Serial.print(klimaatDataNu[plantenbak][variable]);
+                    
                 }
             }
             myFile.print("\n");
@@ -1169,7 +1220,72 @@ class KlimaatDataLogger {
             Serial.println("error opening the text file!");
         }
     }
-
+    // void readDataPointsFromFile(int myPlantenBakNummer, int mySoortKlimaatData) {
+    //     int plantenBakNummer = myPlantenBakNummer;
+    //     int soortKlimaatData = mySoortKlimaatData;
+    //     int inInt = 0;
+    //     int aantalKommas = 0;
+    //     int positieXAs = 0;        
+    //     int grafiekData[288];
+    //     char inChar;
+    //     String inString = "";
+    //     boolean flag1 = true;
+        
+    //     myFile = SD.open(naamFile);
+    //     Serial.println(naamFile);
+    //     if (myFile) {
+    //         while (myFile.available() && positieXAs < 288) {
+    //             inChar =myFile.read();
+    //             if (inChar == ',') {
+    //                 aantalKommas++;
+    //                 if (flag1 && aantalKommas == ((plantenBakNummer * aantalKlimaatData) + (soortKlimaatData +1))) {
+    //                     // Serial.print("flag1 true");
+    //                     aantalKommas = 1;
+    //                     inChar = myFile.read();
+    //                     while (isDigit(inChar)) {
+    //                         inString = inString + inChar;
+    //                         inChar = myFile.read();
+    //                     }
+    //                     inInt = inString.toInt();
+    //                     inString = ""; // clear the string for new input:
+    //                     Serial.print("[");
+    //                     Serial.print(inInt);
+    //                     Serial.print(",");
+    //                     grafiekData[positieXAs] = inInt;
+    //                     Serial.print(positieXAs);
+    //                     Serial.print("]");
+    //                     positieXAs++;
+    //                     flag1 = false;
+    //                 }
+    //                 if (!flag1 && aantalKommas % (aantalPlantenBakken * aantalKlimaatData) == 0 ) {
+    //                     //Serial.print("flag1 false");
+    //                     aantalKommas = 1;
+    //                     inChar = myFile.read();
+    //                     while (isDigit(inChar)) {
+    //                         inString = inString + inChar;
+    //                         inChar = myFile.read();
+    //                     }
+    //                     inInt = inString.toInt();
+    //                     inString = ""; // clear the string for new input:
+    //                     Serial.print("[");
+    //                     Serial.print(inInt);
+    //                     Serial.print(",");
+    //                     grafiekData[positieXAs] = inInt;
+    //                     Serial.print(positieXAs);
+    //                     Serial.print("]");
+    //                     positieXAs++;
+    //                     flag1 = false;
+    //                 }
+    //             }              
+    //         } 
+    //         myFile.close(); // close the file:
+    //         Serial.println("done closing.");           
+    //     } 
+    //     else {
+    //         Serial.println("error opening the text file!");// if the file didn't open, report an error:
+    //     }
+    // }
+    
     void readFromFile() {
         myFile = SD.open(naamFile);
         Serial.println(naamFile);
@@ -1212,7 +1328,6 @@ class KlimaatDataLogger {
     //     return result;
     // }
 };
-
 
 class Klok {
     
@@ -1318,7 +1433,7 @@ void setup (void){
     touchScreen.setup();
     klimaatDataLogger.setup();
     delay(5000); //give Slave time to prepare for transfer
-    dataUitwisselaarMaster.zendOntvangData();//zodat eerste meting is gedaan voordat scherm aangaat
+    dataUitwisselaarMaster.zendOntvangData();//opdat waardes kloppen eerste (foute) meting al gedaan voordat scherm aangaat 
 }
 
 void loop(){
@@ -1331,12 +1446,11 @@ void loop(){
     if(currentPage == 1 or currentPage == 0) { //0 wanneer terug uit settings schermen
         touchScreen.toonStartScherm(datumTijd);
     }
-    
-    
-    //String klimaatDataString = klimaatDataLogger.maakKlimaatDataString();
-    //Serial.println(klimaatDataString);
     klimaatDataLogger.writeToFile();
-    klimaatDataLogger.readFromFile();
+    //klimaatDataLogger.readFromFile();
+
+    //klimaatDataLogger.readDataPointsFromFile(0, DAGTEMPERATUUR);
+
     
     RtcDateTime tijd2;
     int teller = tijd.Minute();
