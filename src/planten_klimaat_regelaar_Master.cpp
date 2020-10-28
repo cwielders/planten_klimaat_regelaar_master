@@ -728,12 +728,13 @@ class TouchScreen {
         }
     }
 
-    void drawGraphs (int nomberOfDataPoints, int lineColour, int plantenBakNummer) {
+    void drawGraphs (int nomberOfDataPoints, int lineColour, int myPlantenBakNummer) {
 
         int buf[318];
         int x, x2;
         int y, y2;
         int r;
+        int plantenBakNummer = myPlantenBakNummer;
         
         currentPage = 5;
         Serial.print(" currentPage = ");
@@ -760,8 +761,8 @@ class TouchScreen {
         myGLCD.print("*Titel Grafiek*", CENTER, 1);
 
     // Draw crosshairs
-        myGLCD.setColor(0, 0, 255);
-        myGLCD.setBackColor(0, 0, 0);
+        myGLCD.setColor(VGA_BLUE);
+        myGLCD.setBackColor(VGA_BLACK);
         myGLCD.drawLine(16, 16, 16, 200);
         for (int i=16; i<200; i+=10)
             myGLCD.drawLine(16, i, 20, i);
@@ -772,40 +773,8 @@ class TouchScreen {
         for (int i=16; i<304; i+=12)
             myGLCD.drawLine(i, 196, i, 200);
 
-
-        readDataPointsFromFile(0, DAGTEMPERATUUR);   
-    // Draw sin-, cos- and tan-lines  
-        myGLCD.setColor(0,255,255);
-        myGLCD.print("Hum", 35, 15);
-        for (int i=1; i<318; i++)
-        {
-            myGLCD.drawPixel(i,119+(sin(((i*1.13)*3.14)/180)*95));
-        }
-        
-        myGLCD.setColor(255,0,0);
-        myGLCD.print("Temp", 35, 27);
-        for (int i=1; i<318; i++)
-        {
-            myGLCD.drawPixel(i,119+(cos(((i*1.13)*3.14)/180)*95));
-        }
-
-        myGLCD.setColor(255,255,0);
-        myGLCD.print("Pot", 35, 39);
-        for (int i=1; i<318; i++)
-        {
-            myGLCD.drawPixel(i,119+(tan(((i*1.13)*3.14)/180)));
-        }
-
-  
-        // myGLCD.setColor(0,0,0);
-        // myGLCD.fillRect(1,15,318,224);
-        // myGLCD.setColor(0, 0, 255);
-        // myGLCD.setBackColor(0, 0, 0);
-        // myGLCD.drawLine(159, 15, 159, 224);
-        // myGLCD.drawLine(1, 119, 318, 119);
-
-
-        
+        readDataPointsFromFile(plantenBakNummer, DAGTEMPERATUUR, VGA_RED);   
+        readDataPointsFromFile(plantenBakNummer, NACHTTEMPERATUUR, VGA_GREEN);  
         while (currentPage == 5) {
             if (currentPage == 5 && myTouch.dataAvailable()) {
                 myTouch.read();
@@ -854,13 +823,13 @@ class TouchScreen {
         }
     }    
 
-    void readDataPointsFromFile(int myPlantenBakNummer, int mySoortKlimaatData) {
+    void readDataPointsFromFile(int myPlantenBakNummer, int mySoortKlimaatData, int myColor) {
         int plantenBakNummer = myPlantenBakNummer;
         int soortKlimaatData = mySoortKlimaatData;
+        int color = myColor;
         int inInt = 0;
         int aantalKommas = 0;
         int positieXAs = 0;        
-        int grafiekData[288];
         char inChar;
         String inString = "";
         boolean flag1 = true;
@@ -868,12 +837,11 @@ class TouchScreen {
         myFile = SD.open(naamFile);
         Serial.println(naamFile);
         if (myFile) {
-            while (myFile.available() && positieXAs < 288) {
+            while (myFile.available() && positieXAs < 304) {
                 inChar =myFile.read();
                 if (inChar == ',') {
                     aantalKommas++;
                     if (flag1 && aantalKommas == ((plantenBakNummer * aantalKlimaatData) + (soortKlimaatData +1))) {
-                        // Serial.print("flag1 true");
                         aantalKommas = 1;
                         inChar = myFile.read();
                         while (isDigit(inChar)) {
@@ -881,19 +849,13 @@ class TouchScreen {
                             inChar = myFile.read();
                         }
                         inInt = inString.toInt();
+                        myGLCD.setColor(color);
                         myGLCD.drawPixel(inInt, (positieXAs+16));
                         inString = ""; // clear the string for new input:
-                        Serial.print("[");
-                        Serial.print(inInt);
-                        Serial.print(",");
-                        grafiekData[positieXAs] = inInt;
-                        Serial.print(positieXAs);
-                        Serial.print("]");
                         positieXAs++;
                         flag1 = false;
                     }
                     if (!flag1 && aantalKommas % (aantalPlantenBakken * aantalKlimaatData) == 0 ) {
-                        //Serial.print("flag1 false");
                         aantalKommas = 1;
                         inChar = myFile.read();
                         while (isDigit(inChar)) {
@@ -903,20 +865,18 @@ class TouchScreen {
                         inInt = inString.toInt();
                         myGLCD.drawPixel((positieXAs+16), inInt);
                         inString = ""; // clear the string for new input:
-                        Serial.print("[");
-                        Serial.print(inInt);
-                        Serial.print(",");
-                        grafiekData[positieXAs] = inInt;
-                        Serial.print(positieXAs);
-                        Serial.print("]");
                         positieXAs++;
-                        flag1 = false;
-                    }
+                        }
                 }              
             } 
             myFile.close(); // close the file:
             Serial.println("done closing.");           
         } 
+                        // Serial.print("[");
+                        // Serial.print(inInt);
+                        // Serial.print(",");
+                        // Serial.print(positieXAs+16);
+                        // Serial.print("]");
         else {
             Serial.println("error opening the text file!");// if the file didn't open, report an error:
         }
