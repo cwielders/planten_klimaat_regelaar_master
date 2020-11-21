@@ -751,12 +751,19 @@ class TouchScreen {
         int positieXAs4 = xAsBegin + 1;
         int positieXAs5 = xAsBegin + 1; 
         int positieXAs6 = xAsBegin + 1;
-        int positieXAs7 = xAsBegin + 1;   
+        int positieXAs7 = xAsBegin + 1;  
+        int dataPositie1 = (plantenBakNummer * aantalKlimaatData) + (DAGTEMPERATUUR + 1); 
+        int dataPositie2 = (plantenBakNummer * aantalKlimaatData) + (NACHTTEMPERATUUR + 1); 
+        int dataPositie3 = (plantenBakNummer * aantalKlimaatData) + (TEMPERATUURNU + 1); 
+        int dataPositie4 = (plantenBakNummer * aantalKlimaatData) + (LUCHTVOCHTIGHEID + 1); 
+        int dataPositie5 = (plantenBakNummer * aantalKlimaatData) + (LUCHTVOCHTIGHEIDNU + 1); 
+        int dataPositie6 = (plantenBakNummer * aantalKlimaatData) + (ISDAG +1); 
+        int dataPositie7 = (plantenBakNummer * aantalKlimaatData) + (ISDAUW +1); 
         int aantalKommas = 0;
-        int newTempMax;
-        int newTempMin;
-        int newHumMax;
-        int newHumMin;
+        int newTempMax = 0;
+        int newTempMin = 100;
+        int newHumMax = 0;
+        int newHumMin = 100;
         float scaleTemp = 4;
         float scaleHum = 1.84;
         float scaleDay = 5;
@@ -767,14 +774,15 @@ class TouchScreen {
         myGLCD.clrScr();
         myGLCD.setFont(SmallFont);
         myGLCD.setColor(VGA_WHITE);
-        myGLCD.drawRoundRect(2, 215, 80, 238);
-        myGLCD.drawRoundRect(82, 215, 160, 238);
-        myGLCD.drawRoundRect(162, 215, 240, 238);
+        // myGLCD.drawRoundRect(2, 215, 80, 238);
+        // myGLCD.drawRoundRect(82, 215, 160, 238);
+        // myGLCD.drawRoundRect(162, 215, 240, 238);
         myGLCD.drawRoundRect(242, 215, 318, 238);
         myGLCD.print("Back", 266, 221);
-        myGLCD.print("Week", 24, 221);
-        myGLCD.print("Maand", 102, 221);
-        myGLCD.print("Jaar", 187, 221);
+        // myGLCD.print("Week", 24, 221);
+        // myGLCD.print("Maand", 102, 221);
+        // myGLCD.drawRoundRect(162, 215, 240, 238);
+        // myGLCD.print("Jaar", 187, 221);
         //myGLCD.setColor(VGA_GREEN);
         //myGLCD.drawRect(0, 14, 319, 225);
         myGLCD.setColor(VGA_RED);
@@ -792,31 +800,45 @@ class TouchScreen {
 
         myFile = SD.open(naamFile);
         Serial.println(naamFile);
+        Serial.print("newTempMax,newTempMin,newHumMax,newHumMin =");
+                    Serial.print(newHumMin);
+                    Serial.println(newHumMax);
+                    Serial.println(newTempMin);
+                    Serial.println(newTempMax);
         if (myFile) {
             while (myFile.available() && positieXAs5 < xAsEind) {
                 inChar =myFile.read();
                 if (inChar == ',') {
                     aantalKommas++;
-
-                    drawDataPoints(plantenBakNummer, DAGTEMPERATUUR, 0xF800, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs1);  // 0xF800 VGA_RED
-                    drawDataPoints(plantenBakNummer, NACHTTEMPERATUUR, 0xF800, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs2);  //0xFFFF VGA_WHITE
-                    drawDataPoints(plantenBakNummer, TEMPERATUURNU, 0xFFFF, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs3);
-                    drawDataPoints(plantenBakNummer, LUCHTVOCHTIGHEID, 0xC618, humMin, humMax, newTempMin, newTempMax, aantalKommas, positieXAs4);  // 0x001F VGA_BLUE
-                    drawDataPoints(plantenBakNummer, LUCHTVOCHTIGHEIDNU, 0xFFE0, humMin, humMax, newTempMin, newTempMax, aantalKommas, positieXAs5);  //0xFFE0 VGA_YELLOW
-                    //drawDataPoints(plantenBakNummer, ISDAG, 0xF800, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs6);  //0x8000 VGA_Maroon
-                    //drawDataPoints(plantenBakNummer, ISDAUW, 0xFFE0, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs7);  //0xFFE0 VGA_YELLOW
+                    
+                    drawDataPoints(dataPositie1, 0xF800, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs1);  // 0xF800 VGA_RED
+                    drawDataPoints(dataPositie2, 0xF800, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs2);  //0xFFFF VGA_WHITE
+                    drawDataPoints(dataPositie3, 0xFFFF, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs3);
+                    drawDataPoints(dataPositie4, 0xC618, humMin, humMax, newHumMin, newHumMax, aantalKommas, positieXAs4);  // 0x001F VGA_BLUE
+                    drawDataPoints(dataPositie5, 0xFFE0, humMin, humMax, newHumMin, newHumMax, aantalKommas, positieXAs5);  //0xFFE0 VGA_YELLOW
+                    //drawDataPoints(dataPositie6, 0xF800, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs6);  //0x8000 VGA_Maroon
+                    //drawDataPoints(dataPositie7, 0xFFE0, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs7);  //0xFFE0 VGA_YELLOW
                     
                     
                 } 
             }                            
             myFile.close(); // close the file:
-            Serial.println("done closing.");           
-        }
-        else {
+            Serial.println("done closing.");  
+            myGLCD.setColor(VGA_WHITE);
+            myGLCD.drawRoundRect(2, 215, 80, 238);
+            myGLCD.drawRoundRect(82, 215, 160, 238);
+            myGLCD.drawRoundRect(162, 215, 240, 238);
+            myGLCD.print("Week", 24, 221);
+            myGLCD.print("Maand", 102, 221);
+            myGLCD.print("Scale", 187, 221);    
+            Serial.println("newTempMax,newTempMin,newHumMax,newHumMin =");
+                    Serial.println(newHumMin);
+                    Serial.println(newHumMax);
+                    Serial.println(newTempMin);
+                    Serial.println(newTempMax);    
+        } else {
             Serial.println("error opening the text file!");// if the file didn't open, report an error:
-        }
-        
-        //drawDataPointsFromFile(plantenBakNummer);   
+        } 
         
         while (currentPage == 5) {
             if (currentPage == 5 && myTouch.dataAvailable()) {
@@ -871,15 +893,20 @@ class TouchScreen {
                     //     }
                     //     tekenSettingsManipulatieScherm(bak);
                     // }
-                    // if ((x>=160) && (x<=240)) {
-                    //     betast(162, 215, 240, 238);
-                    //     for(int i=0; i<3; i++) {
-                    //         for(int j=0; j<12; j++) {
-                    //             customPlantenBakSettings[bak][i][j] = defaultPlantenBakSettings[SUMATRA][i][j];
-                    //         }
-                    //     }
-                    //     tekenSettingsManipulatieScherm(bak);
-                    // }
+                    if ((x>=160) && (x<=240)) {
+                        betast(162, 215, 240, 238);
+                        Serial.print(humMax);
+                        humMax = newHumMax;
+                        humMin = newHumMin;
+                        tempMax = newTempMax;
+                        tempMin = newTempMin;
+                        Serial.print("newTempMax,newTempMin,newHumMax,newHumMin =");
+                        Serial.print(humMin);
+                        Serial.println(humMax);
+                        Serial.println(tempMin);
+                        Serial.println(tempMax);
+                        drawGraphs(plantenBakNummer);
+                    }
                     if ((x>=240) && (x<=320)) {
                         betast(242, 215, 318, 238);
                         Serial.println("BACK GEDRUKT IN Grafieken");
@@ -892,14 +919,16 @@ class TouchScreen {
         }
     }    
     //plantenBakNummer, DAGTEMPERATUUR, 0xF800, tempMin, tempMax, newTempMin, newTempMax, aantalKommas, positieXAs1);
-    void drawDataPoints(int plantenBakNummer, int variable, int collor, int &variableMin, int &variableMax, int &newVariableMin, int &newVariableMax,int &aantalKommas, int &positieXAs) {
+    void drawDataPoints(int dataPositie, int collor, int &variableMin, int &variableMax, int &newVariableMin, int &newVariableMax,int &aantalKommas, int &positieXAs) {
         
         int inInt;
         char inChar;
         String inString = "";
         myGLCD.setColor(collor);
-        int dataPositie = (plantenBakNummer * aantalKlimaatData) + (variable +1);
-        if ((((aantalPlantenBakken * aantalKlimaatData) + aantalKommas) - dataPositie) % (aantalPlantenBakken * aantalKlimaatData) == 0 ) {
+        // Serial.print(" new variableMax in begin drawdatapoints =");
+        // Serial.println(newVariableMax);
+        // int dataPositie = (plantenBakNummer * aantalKlimaatData) + (variable +1);
+        if ((aantalKommas - dataPositie) % (aantalPlantenBakken * aantalKlimaatData) == 0 ) {
             inChar = myFile.read();
             while (isDigit(inChar)) {
                 inString = inString + inChar;
@@ -908,29 +937,41 @@ class TouchScreen {
             aantalKommas++;
             positieXAs++;
             inInt = inString.toInt();
-            if(inInt > variableMax) {
-                newVariableMax = inInt;
-                inInt = variableMax;
-                myGLCD.setColor(VGA_RED);
-            }
-            if(inInt < variableMin) {
-                newVariableMin = variableMin;
-                inInt = variableMin;
-                Serial.print("Was in if");
-
-            }
             inString = ""; // clear the string for new input:
             myGLCD.setColor(collor);
-            //float pixelsPerEenheid = float(yAsOnder - yAsBoven) / float(maxWaarde - minWaarde);
-            myGLCD.drawPixel(positieXAs,(yAsOnder - round((float(yAsOnder - yAsBoven) / float(variableMax - variableMin)) * inInt)));
-            Serial.print("InInt =");
-            Serial.println(inInt);
-            Serial.print("[");
-            Serial.print(round(float(yAsOnder - yAsBoven) / float(variableMax - variableMin)));
-            Serial.print("[");
-            // Serial.print(200 - round((scale * inInt)));
+            int positionYas = yAsOnder - round(inInt * (float(yAsOnder - yAsBoven) / float(variableMax - variableMin)));
+            if(inInt > newVariableMax) {
+                newVariableMax = inInt;
+                // Serial.print(" inInt =");
+                // Serial.println(inInt);
+                // Serial.print(" new variableMax =");
+                // Serial.println(newVariableMax);
+            }
+            if(inInt < newVariableMin) {
+                newVariableMax = inInt;
+                // Serial.print(" inInt =");
+                // Serial.print(inInt);
+                newVariableMin = inInt;
+                // Serial.print(" new variableMin =");
+                // Serial.println(newVariableMin);
+            }
+            if(inInt > variableMax) {
+                newVariableMax = inInt;
+                // Serial.print("Was in if variableMax /");
+                myGLCD.setColor(VGA_RED);
+                positionYas = yAsBoven;
+            }
+            if(inInt < variableMin) {
+                //Serial.print("Was in if variableMin / ");
+                positionYas = yAsOnder;
+                myGLCD.setColor(VGA_RED);
+            }
+            myGLCD.drawPixel(positieXAs, positionYas);
+
+            // Serial.print("[");
+            // Serial.print(positieXAs);
             // Serial.print(",");
-            // Serial.print(positieXAs+16);
+            // Serial.print(positionYas);
             // Serial.print("]");
         } 
     }
@@ -1100,7 +1141,7 @@ class TouchScreen {
                         betast(10, 130, 150, 180);
                         stCurrent[0]='\0';
                         stCurrentLen=0;
-                        myGLCD.setColor(0, 0, 0);
+                        myGLCD.setColor(VGA_BLACK); //(0, 0, 0)
                         myGLCD.fillRect(0, 224, 319, 239);
                     }
                     if ((x>=160) && (x<=300)) { // Button: Enter
@@ -1114,7 +1155,7 @@ class TouchScreen {
                             myGLCD.setColor(0, 0, 0);
                             myGLCD.fillRect(0, 208, 319, 239);
                             myGLCD.setColor(0, 255, 0);
-                            /myGLCD.setFont(BigFont);
+                            myGLCD.setFont(BigFont);
                             myGLCD.print(String(stLast), LEFT, 208);
                             //returnVallue = atoi(stLast);
                             // if(previousPage = 3){
@@ -1152,7 +1193,6 @@ class TouchScreen {
         Serial.println("begin betast");
         myGLCD.setColor(VGA_RED);
         myGLCD.drawRoundRect (x1, y1, x2, y2);
-        /myGLCD.setColor(VGA_WHITE);
         // myGLCD.drawRoundRect (x1, y1, x2, y2);
         while (myTouch.dataAvailable()){
             myTouch.read();
